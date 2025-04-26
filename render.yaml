@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: university-notice-backend
+    env: java
+    plan: free
+    buildCommand: "./gradlew build"
+    startCommand: "java -cp build/libs/*.jar Main"
+    envVars:
+      - key: DATABASE_URL
+        value: "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?user=postgres.qcfslaprrbxxefmigefe&password=Ganesh123@"
+      - key: DATABASE_USER
+        value: "postgres.qcfslaprrbxxefmigefe"
+      - key: DATABASE_PASSWORD
+        value: "Ganesh123@"
