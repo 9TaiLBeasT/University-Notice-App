@@ -36,6 +36,15 @@ public class Main {
 
                         Notice newNotice = new Notice(title, content, category);
                         dao.addNotice(newNotice);
+
+                        // ✅ Send push notification
+                        try {
+                            FCMSender.sendPushNotification(title, content);
+                            System.out.println("📲 Push notification sent.");
+                        } catch (Exception e) {
+                            System.out.println("❌ Failed to send push notification: " + e.getMessage());
+                        }
+
                         System.out.println("✅ Notice added successfully.");
                         break;
 
