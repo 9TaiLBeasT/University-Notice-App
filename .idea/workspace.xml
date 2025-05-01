@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="56fc896c-92c5-4e2c-b6d4-3e87be24549b" name="Changes" comment="" />
+    <list default="true" id="56fc896c-92c5-4e2c-b6d4-3e87be24549b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/ndarray_0_2_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/ndarray_0_4_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/tensorflow_core_api_0_4_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/libraries/tensorflow_core_platform_0_4_0.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/saved_faq_bot/saved_model.pb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/saved_faq_bot/variables/variables.data-00000-of-00001" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/saved_faq_bot/variables/variables.index" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UniversityNoticesApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/UniversityNoticesApp.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/mysql-connector-j-9.3.0.jar" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,7 +35,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
@@ -47,9 +58,9 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/gtsga/OneDrive/Desktop/other submissiona/2nd year/Term-3/Java/Project/UniversityNoticesApp/lib/json-20210307-javadoc.jar",
+    "last_opened_file_path": "C:/Users/gtsga/OneDrive/Desktop/other submissiona/2nd year/Term-3/Java/Project/UniversityNoticesApp/lib/tensorflow-1.15.0.jar",
     "onboarding.tips.debug.path": "C:/Users/gtsga/OneDrive/Desktop/other submissiona/2nd year/Term-3/Java/Project/UniversityNoticesApp/src/Main.java",
-    "project.structure.last.edited": "Project",
+    "project.structure.last.edited": "Modules",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2"
   },
@@ -62,14 +73,11 @@
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\lib" />
+      <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\model" />
+      <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\saved_faq_bot\variables" />
+      <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\saved_faq_bot" />
+      <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\src" />
     </key>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="jdk-21.0.1-openjdk-21.0.1-e1d2075fd9a7-b4911678" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">

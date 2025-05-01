@@ -1,13 +1,18 @@
 FROM openjdk:17-jdk-slim
 
+# Create working directory
 WORKDIR /app
 
-COPY . /app
+# Copy all files
+COPY . .
 
-# Compile Java files from the src folder
+# Compile Java files
 WORKDIR /app/src
 
-RUN javac -cp ".:../lib/*" Main.java Notice.java NoticeDAO.java DBConnection.java NoticeHttpServer.java
+RUN javac -cp ".:../lib/*" *.java
 
-# Run the server
+# Expose the port your server uses (optional but recommended)
+EXPOSE 8000
+
+# Run the HTTP server
 CMD ["java", "-cp", ".:../lib/*", "NoticeHttpServer"]
