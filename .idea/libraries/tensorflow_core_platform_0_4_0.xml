@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="tensorflow-core-platform-0.4.0">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/tensorflow-core-platform-0.4.0.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

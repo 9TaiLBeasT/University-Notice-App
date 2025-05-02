@@ -4,7 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="56fc896c-92c5-4e2c-b6d4-3e87be24549b" name="Changes" comment="" />
+    <list default="true" id="56fc896c-92c5-4e2c-b6d4-3e87be24549b" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/lib/firebase-admin-9.2.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/google-api-client-1.31.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/google-auth-library-oauth2-http-1.11.0.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/google-http-client-gson-1.41.5.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/gson-2.8.9.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/protobuf-java-3.21.12.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/serviceAccountKey.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UniversityNoticesApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/UniversityNoticesApp.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/FCMSender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FCMSender.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -49,7 +60,7 @@
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/gtsga/OneDrive/Desktop/other submissiona/2nd year/Term-3/Java/Project/UniversityNoticesApp/lib/tensorflow-1.15.0.jar",
     "onboarding.tips.debug.path": "C:/Users/gtsga/OneDrive/Desktop/other submissiona/2nd year/Term-3/Java/Project/UniversityNoticesApp/src/Main.java",
-    "project.structure.last.edited": "Modules",
+    "project.structure.last.edited": "Libraries",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2"
   },
@@ -62,10 +73,10 @@
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\lib" />
+      <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp" />
       <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\model" />
       <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\saved_faq_bot\variables" />
       <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\saved_faq_bot" />
-      <recent name="C:\Users\gtsga\OneDrive\Desktop\other submissiona\2nd year\Term-3\Java\Project\UniversityNoticesApp\src" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
