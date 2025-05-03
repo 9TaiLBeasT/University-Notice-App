@@ -17,5 +17,21 @@
     <orderEntry type="library" name="google-http-client-gson-1.41.5" level="application" />
     <orderEntry type="library" name="gson-2.8.9" level="application" />
     <orderEntry type="library" name="protobuf-java-3.21.12" level="application" />
+    <orderEntry type="library" name="guava-32.1.2-jre" level="application" />
+    <orderEntry type="library" name="jackson-core-2.15.0" level="application" />
+    <orderEntry type="library" name="jackson-databind-2.15.0" level="application" />
+    <orderEntry type="library" name="slf4j-api-2.0.5" level="application" />
+    <orderEntry type="library" name="google-auth-library-credentials-1.17.0" level="application" />
+    <orderEntry type="library" name="google-http-client-1.43.3" level="application" />
+    <orderEntry type="library" name="google-http-client-jackson2-1.43.3" level="application" />
+    <orderEntry type="library" name="api-common-2.15.0" level="application" />
+    <orderEntry type="library" name="slf4j-simple-2.0.5" level="application" />
+    <orderEntry type="library" name="opencensus-api-0.28.3" level="application" />
+    <orderEntry type="library" name="opencensus-contrib-http-util-0.31.1" level="application" />
+    <orderEntry type="library" name="grpc-context-1.61.1" level="application" />
+    <orderEntry type="library" name="grpc-context-1.61.1 (2)" level="project" />
+    <orderEntry type="library" name="grpc-api-1.61.1" level="application" />
+    <orderEntry type="library" name="grpc-auth-1.61.1" level="application" />
+    <orderEntry type="library" name="grpc-core-1.61.1" level="application" />
   </component>
 </module>

@@ -11,14 +11,18 @@ public class FCMSender {
 
     static {
         try {
-            FileInputStream serviceAccount = new FileInputStream("src/serviceAccountKey.json");
+            FileInputStream serviceAccount = new FileInputStream("./serviceAccountKey.json");
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
-            FirebaseApp.initializeApp(options);
+            // Avoid duplicate initialization
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseApp.initializeApp(options);
+            }
         } catch (Exception e) {
+            System.err.println("❌ Firebase initialization failed:");
             e.printStackTrace();
         }
     }
