@@ -5,7 +5,7 @@ import java.util.List;
 public class NoticeDAO {
 
     public void addNotice(Notice notice) {
-        String sql = "INSERT INTO notices (title, content, category) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO notices (title, content, category, is_event, event_time) VALUES (?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -13,6 +13,8 @@ public class NoticeDAO {
             stmt.setString(1, notice.getTitle());
             stmt.setString(2, notice.getContent());
             stmt.setString(3, notice.getCategory());
+            stmt.setBoolean(4, notice.isEvent());
+            stmt.setTimestamp(5, notice.getEventTime());
             stmt.executeUpdate();
 
             System.out.println("✅ Notice added.");
@@ -38,12 +40,15 @@ public class NoticeDAO {
                 );
                 notice.setId(rs.getInt("id"));
                 notice.setCreatedAt(rs.getTimestamp("created_at"));
+                notice.setEvent(rs.getBoolean("is_event"));
+                notice.setEventTime(rs.getTimestamp("event_time"));
                 notices.add(notice);
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return notices;
     }
 
@@ -112,5 +117,4 @@ public class NoticeDAO {
             e.printStackTrace();
         }
     }
-
 }

@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="56fc896c-92c5-4e2c-b6d4-3e87be24549b" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UniversityNoticesApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/UniversityNoticesApp.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/FCMSender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/FCMSender.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Notice.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Notice.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/NoticeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/NoticeDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/NoticeHttpServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/NoticeHttpServer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,7 +30,7 @@
     <option name="stateVersion" value="1" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 4
@@ -86,16 +87,5 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/Main.java</url>
-          <line>2</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

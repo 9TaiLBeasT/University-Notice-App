@@ -1,3 +1,6 @@
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 import java.sql.SQLException;
@@ -34,10 +37,28 @@ public class Main {
                         System.out.print("Enter Category (General/Faculty/Student): ");
                         String category = scanner.nextLine();
 
+                        System.out.print("Is this an event notice? (yes/no): ");
+                        boolean isEvent = scanner.nextLine().equalsIgnoreCase("yes");
+
+                        Timestamp eventTimestamp = null;
+                        if (isEvent) {
+                            System.out.print("Enter Event DateTime (e.g., 2025-05-02T14:00): ");
+                            String eventDateTimeStr = scanner.nextLine();
+                            try {
+                                LocalDateTime eventDateTime = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                                eventTimestamp = Timestamp.valueOf(eventDateTime);
+                            } catch (Exception e) {
+                                System.out.println("❌ Invalid format. Use: yyyy-MM-ddTHH:mm (e.g. 2025-05-02T14:00)");
+                                break;
+                            }
+                        }
+
                         Notice newNotice = new Notice(title, content, category);
+                        newNotice.setEvent(isEvent);
+                        newNotice.setEventTime(eventTimestamp);
+
                         dao.addNotice(newNotice);
 
-                        // ✅ Send push notification
                         try {
                             FCMSender.sendPushNotification(title, content);
                             System.out.println("📲 Push notification sent.");
@@ -61,6 +82,9 @@ public class Main {
                                 System.out.println("Content: " + n.getContent());
                                 System.out.println("Category: " + n.getCategory());
                                 System.out.println("Posted On: " + n.getCreatedAt());
+                                if (n.isEvent()) {
+                                    System.out.println("📅 Event DateTime: " + n.getEventTime());
+                                }
                             }
                         }
                         break;
@@ -86,7 +110,7 @@ public class Main {
 
                         System.out.print("Enter the ID of the notice you want to update: ");
                         int updateId = scanner.nextInt();
-                        scanner.nextLine(); // consume newline
+                        scanner.nextLine();
 
                         System.out.println("What do you want to update?");
                         System.out.println("1. Title");
@@ -95,7 +119,7 @@ public class Main {
                         System.out.println("4. All");
                         System.out.print("Enter your choice: ");
                         int updateChoice = scanner.nextInt();
-                        scanner.nextLine(); // consume newline
+                        scanner.nextLine();
 
                         String updatedTitle = null;
                         String updatedContent = null;
@@ -129,6 +153,7 @@ public class Main {
                             default:
                                 System.out.println("❌ Invalid update option.");
                         }
+
                         System.out.println("✅ Notice updated.");
                         break;
 

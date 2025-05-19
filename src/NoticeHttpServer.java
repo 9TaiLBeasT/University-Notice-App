@@ -1,9 +1,11 @@
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.util.List;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -13,7 +15,7 @@ public class NoticeHttpServer {
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext("/notices", new NoticeHandler());
         server.setExecutor(null); // default executor
-        System.out.println("Server started on port 8000");
+        System.out.println("🚀 Server started on port 8000");
         server.start();
     }
 
@@ -51,12 +53,18 @@ public class NoticeHttpServer {
                     obj.put("content", notice.getContent());
                     obj.put("category", notice.getCategory());
                     obj.put("created_at", notice.getCreatedAt());
+
+                    // ➕ Include event fields
+                    obj.put("is_event", notice.isEvent());
+                    obj.put("event_datetime", notice.getEventTime() != null ? notice.getEventTime().toString() : "");
+
+
                     jsonArray.put(obj);
                 }
 
                 String response = jsonArray.toString();
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, response.length());
+                exchange.sendResponseHeaders(200, response.getBytes().length);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
@@ -83,10 +91,14 @@ public class NoticeHttpServer {
                 JSONObject json = new JSONObject(requestBody.toString());
                 String title = json.getString("title");
                 String content = json.getString("content");
-                String category = json.has("category") ? json.getString("category") : "General";
+                String category = json.optString("category", "General");
+
+                // New fields for calendar event
+                boolean isEvent = json.optBoolean("is_event", false);
+                String eventDateTime = json.optString("event_datetime", "");
 
                 // Create and save notice
-                Notice notice = new Notice(title, content, category);
+                Notice notice = new Notice(title, content, category, isEvent, eventDateTime);
                 NoticeDAO noticeDAO = new NoticeDAO();
                 noticeDAO.addNotice(notice);
 
