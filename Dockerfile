@@ -1,15 +1,13 @@
 FROM openjdk:17-jdk-slim
 
+# Create and set working directory
 WORKDIR /app
 
+# Copy everything
 COPY . .
 
-# Expand JAR classpath into a single string (fixes "cannot access" errors)
-RUN CLASSPATH=$(find lib -name "*.jar" | tr '\n' ':') && \
-    echo "Compiling with classpath: $CLASSPATH" && \
-    cd src && \
-    javac -cp "$CLASSPATH" *.java
+# ✅ Compile using full classpath with all jars in lib/
+RUN javac -cp "lib/*" src/*.java
 
-ENV GOOGLE_APPLICATION_CREDENTIALS=/app/src/serviceAccountKey.json
-
-CMD ["java", "-cp", "src:lib/*", "NoticeHttpServer"]
+# ✅ Run the server using correct classpath
+CMD ["java", "-cp", "lib/*:src", "NoticeHttpServer"]
