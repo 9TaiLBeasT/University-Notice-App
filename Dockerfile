@@ -1,13 +1,18 @@
 FROM openjdk:17-jdk-slim
 
-# Create and set working directory
+# Set working directory
 WORKDIR /app
 
-# Copy everything
+# Copy all files
 COPY . .
 
-# ✅ Compile using full classpath with all jars in lib/
-RUN javac -cp "lib/*" src/*.java
+# Generate classpath string manually (since lib/* doesn't expand properly in Docker builds)
+RUN CLASSPATH=$(find lib -name "*.jar" | paste -sd ":" -) && \
+    echo "Compiling with classpath: $CLASSPATH" && \
+    javac -cp "$CLASSPATH:src" src/*.java
 
-# ✅ Run the server using correct classpath
+# Set environment variable for Firebase
+ENV GOOGLE_APPLICATION_CREDENTIALS=/app/src/serviceAccountKey.json
+
+# Run the server
 CMD ["java", "-cp", "lib/*:src", "NoticeHttpServer"]
