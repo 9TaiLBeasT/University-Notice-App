@@ -18,7 +18,8 @@ public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
         // ✅ Fix: Bind to all interfaces (required for Render/Docker)
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
+        int port = Integer.parseInt(System.getProperty("PORT", "8000"));
+        System.out.println("🌐 Starting server on port " + port);
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
