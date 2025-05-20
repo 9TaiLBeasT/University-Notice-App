@@ -71,7 +71,14 @@ public class DBConnection {
 
             } catch (Exception e) {
                 System.err.println("❌ Failed to initialize database connection pool: " + e.getMessage());
-                e.printStackTrace();
+                e.printStackTrace(System.err);
+                Throwable cause = e.getCause();
+                while (cause != null) {
+                    System.err.println("Caused by: " + cause.getMessage());
+                    cause.printStackTrace(System.err);
+                    cause = cause.getCause();
+                }
+
                 throw new RuntimeException("Database initialization failed", e);
             }
         }
