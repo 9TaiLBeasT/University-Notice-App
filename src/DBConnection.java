@@ -22,7 +22,7 @@ public class DBConnection {
                 // Load from environment
                 String jdbcUrl = System.getenv("DATABASE_URL");
                 if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres";
+                    jdbcUrl = "DATABASE_URL=jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require\n";
                     System.out.println("⚠️ Using default JDBC URL: " + jdbcUrl);
                 } else {
                     System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
@@ -60,6 +60,16 @@ public class DBConnection {
                 config.setMaxLifetime(1800000);
 
                 dataSource = new HikariDataSource(config);
+                try (Connection conn = dataSource.getConnection()) {
+                    if (!conn.isClosed()) {
+                        System.out.println("✅ Test DB connection succeeded");
+                    }
+                } catch (SQLException e) {
+                    System.err.println("❌ Immediate DB connection test failed: " + e.getMessage());
+                    e.printStackTrace(System.err);
+                    throw new RuntimeException("🚨 Immediate DB connection failed", e);
+                }
+
                 System.out.println("✅ Database connection pool initialized successfully");
 
                 // Test the connection immediately
