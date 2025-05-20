@@ -14,7 +14,7 @@ public class DBConnection {
 
                 HikariConfig config = new HikariConfig();
 
-                // Get connection info from environment variables with fallbacks
+                // Load from environment
                 String jdbcUrl = System.getenv("DATABASE_URL");
                 if (jdbcUrl == null || jdbcUrl.isEmpty()) {
                     jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres";
@@ -23,7 +23,7 @@ public class DBConnection {
                     System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
                 }
 
-                String username = System.getenv("DATABASE_USER");
+                String username = System.getenv("DATABASE_USERNAME");  // ✅ Fixed key
                 if (username == null || username.isEmpty()) {
                     username = "postgres.qcfslaprrbxxefmigefe";
                     System.out.println("⚠️ Using default username: " + username);
@@ -43,19 +43,18 @@ public class DBConnection {
                 config.setUsername(username);
                 config.setPassword(password);
 
-                // Set sensible HikariCP timeouts
                 config.setMaximumPoolSize(5);
                 config.setMinimumIdle(1);
-                config.setIdleTimeout(60000);         // 60 seconds
-                config.setConnectionTimeout(10000);    // 10 seconds
-                config.setMaxLifetime(1800000);        // 30 minutes
+                config.setIdleTimeout(60000);
+                config.setConnectionTimeout(10000);
+                config.setMaxLifetime(1800000);
 
                 dataSource = new HikariDataSource(config);
                 System.out.println("✅ Database connection pool initialized successfully");
 
-                // 🔍 Immediately test the connection
-                try (Connection testConn = dataSource.getConnection()) {
-                    if (!testConn.isClosed()) {
+                // Test connection
+                try (Connection conn = dataSource.getConnection()) {
+                    if (!conn.isClosed()) {
                         System.out.println("✅ Test DB connection succeeded");
                     }
                 }

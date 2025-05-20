@@ -5,10 +5,10 @@ services:
     plan: free
     envVars:
       - key: DATABASE_URL
-        value: "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?user=postgres.qcfslaprrbxxefmigefe&password=Ganesh123@"
+        value: jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres
       - key: DATABASE_USERNAME
-        value: "postgres.qcfslaprrbxxefmigefe"
+        value: postgres.qcfslaprrbxxefmigefe
       - key: DATABASE_PASSWORD
-        value: "Ganesh123@"
+        value: Ganesh123@
       - key: FCM_SERVER_KEY
-        value: "key=BKQv3nlwoRJm87d9o6g5Swxs8jj_dKZbqO3HGEC2BI6-_-Vq5x4NGGQeADMAqtOvLXAWfNv34gRMRMJVBEY0OB4"
+        value: key=BKQv3nlwoRJm87d9o6g5Swxs8jj_dKZbqO3HGEC2BI6-_-Vq5x4NGGQeADMAqtOvLXAWfNv34gRMRMJVBEY0OB4
