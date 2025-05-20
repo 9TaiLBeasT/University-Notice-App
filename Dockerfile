@@ -28,4 +28,4 @@ EXPOSE 8000
 COPY start.sh .
 RUN chmod +x start.sh
 
-CMD ["./start.sh"]
+CMD ["java", "-cp", ".:../lib/*", "NoticeHttpServer"]
