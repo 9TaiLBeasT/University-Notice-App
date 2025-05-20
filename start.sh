@@ -1,5 +1,7 @@
 #!/bin/sh
 
+PORT=${PORT:-8000}
 CLASSPATH=$(find lib -name '*.jar' | paste -sd ':' -):src
-echo "Starting server with classpath: $CLASSPATH"
-exec java -cp "$CLASSPATH" NoticeHttpServer
+
+echo "🌐 Starting server on port $PORT"
+exec java -DPORT=$PORT -cp "$CLASSPATH" NoticeHttpServer

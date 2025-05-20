@@ -21,6 +21,7 @@ public class NoticeHttpServer {
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8000"));
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
+
         server.createContext("/notices", new NoticeHandler());
 
         // Add CORS handler for OPTIONS requests
