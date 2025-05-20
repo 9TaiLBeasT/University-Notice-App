@@ -4,68 +4,33 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
-
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
+        // ✅ Fix: Bind to all interfaces (required for Render/Docker)
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8000"));
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
-
         server.createContext("/notices", new NoticeHandler());
-
-        // Add CORS handler for OPTIONS requests
-        server.createContext("/", new CorsHandler());
-
         server.setExecutor(null); // default executor
-        System.out.println("🚀 Server started on port " + port);
-        server.start();
-    }
-
-    // Global CORS handler for preflight requests
-    static class CorsHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            // Add CORS headers
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
-
-            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
-                exchange.sendResponseHeaders(204, -1);
-                return;
-            }
-
-            // Not an OPTIONS request, return 404
-            exchange.sendResponseHeaders(404, -1);
-        }
+        System.out.println("🌐 Listening on http://0.0.0.0:" + port);
+        server.start(); // ✅ This must reference the declared 'server'
     }
 
     static class NoticeHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Add CORS headers to all responses
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
-
             String method = exchange.getRequestMethod();
 
             switch (method.toUpperCase()) {
-                case "OPTIONS":
-                    // Handle preflight CORS request
-                    exchange.sendResponseHeaders(204, -1);
-                    break;
                 case "GET":
                     handleGet(exchange);
                     break;
@@ -94,36 +59,31 @@ public class NoticeHttpServer {
                     obj.put("content", notice.getContent());
                     obj.put("category", notice.getCategory());
                     obj.put("created_at", notice.getCreatedAt());
+
+                    // ➕ Include event fields
                     obj.put("is_event", notice.isEvent());
                     obj.put("event_datetime", notice.getEventTime() != null ? notice.getEventTime().toString() : "");
+
                     jsonArray.put(obj);
                 }
 
                 String response = jsonArray.toString();
-                byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-
-                // Debug output
-                System.out.println("Sending " + notices.size() + " notices to client");
-
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, bytes.length);
-
+                exchange.sendResponseHeaders(200, response.getBytes().length);
                 try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(bytes);
+                    os.write(response.getBytes());
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
-                String error = "{\"error\":\"Unable to fetch notices: " + e.getMessage() + "\"}";
-                byte[] bytes = error.getBytes(StandardCharsets.UTF_8);
+                String error = "{\"error\":\"Unable to fetch notices\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, bytes.length);
+                exchange.sendResponseHeaders(500, error.length());
                 try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(bytes);
+                    os.write(error.getBytes());
                 }
             }
         }
-
 
         private void handlePost(HttpExchange exchange) throws IOException {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
@@ -138,7 +98,6 @@ public class NoticeHttpServer {
                 String content = json.getString("content");
                 String category = json.optString("category", "General");
 
-                // New fields for calendar event
                 boolean isEvent = json.optBoolean("is_event", false);
                 String eventDateTimeStr = json.optString("event_datetime", "");
                 Timestamp eventTime = null;
@@ -152,19 +111,13 @@ public class NoticeHttpServer {
                 notice.setEvent(isEvent);
                 notice.setEventTime(eventTime);
 
-
                 NoticeDAO noticeDAO = new NoticeDAO();
                 noticeDAO.addNotice(notice);
 
-                // Try to send push notification but don't fail if it doesn't work
-                try {
-                    FCMSender.sendPushNotification(title, content);
-                    System.out.println("Push notification sent successfully");
-                } catch (Exception e) {
-                    System.out.println("Failed to send push notification: " + e.getMessage());
-                }
+                // Send push notification
+                FCMSender.sendPushNotification(title, content);
 
-                String response = "{\"message\":\"Notice added successfully\"}";
+                String response = "{\"message\":\"Notice added and push notification sent\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {
@@ -173,7 +126,7 @@ public class NoticeHttpServer {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                String error = "{\"error\":\"Failed to add notice: " + e.getMessage() + "\"}";
+                String error = "{\"error\":\"Failed to add notice\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(500, error.length());
                 try (OutputStream os = exchange.getResponseBody()) {
