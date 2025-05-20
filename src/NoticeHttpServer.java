@@ -4,6 +4,8 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,22 +17,76 @@ import org.json.JSONObject;
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
-        // This is the correct way on Render
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
+        // ✅ Fix: Bind to all interfaces (required for Render/Docker)
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8000"));
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
         server.createContext("/notices", new NoticeHandler());
-        server.setExecutor(null);
-        System.out.println("🌐 Server started on port " + port);
-        System.out.println("🌐 Listening on http://0.0.0.0:" + port);
-        server.start();
-    }
 
+        // Add a health check endpoint
+        server.createContext("/health", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                String response = "{\"status\":\"UP\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.sendResponseHeaders(200, response.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            }
+        });
+
+        // Add a database test endpoint
+        server.createContext("/test-db", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+                try {
+                    Connection conn = DBConnection.getConnection();
+                    conn.close();
+                    String response = "{\"status\":\"Database connection successful\"}";
+                    exchange.sendResponseHeaders(200, response.length());
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
+                } catch (Exception e) {
+                    String errorMessage = e.getMessage();
+                    String response = "{\"status\":\"Database connection failed\",\"error\":\"" +
+                            errorMessage.replace("\"", "\\\"") + "\"}";
+                    exchange.sendResponseHeaders(500, response.length());
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        os.write(response.getBytes());
+                    }
+                }
+            }
+        });
+
+        server.setExecutor(null); // default executor
+        System.out.println("🌐 Starting server on port " + port);
+        server.start();
+        System.out.println("🌐 Listening on http://0.0.0.0:" + port);
+    }
 
     static class NoticeHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers to all responses
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
             String method = exchange.getRequestMethod();
+
+            // Handle preflight requests
+            if (method.equalsIgnoreCase("OPTIONS")) {
+                exchange.sendResponseHeaders(200, -1);
+                return;
+            }
+
+            System.out.println("Received " + method + " request to /notices");
 
             switch (method.toUpperCase()) {
                 case "GET":
@@ -51,7 +107,9 @@ public class NoticeHttpServer {
 
         private void handleGet(HttpExchange exchange) throws IOException {
             try {
+                System.out.println("GET /notices - Attempting to fetch notices...");
                 List<Notice> notices = NoticeDAO.getAllNotices();
+                System.out.println("Successfully fetched " + notices.size() + " notices");
 
                 JSONArray jsonArray = new JSONArray();
                 for (Notice notice : notices) {
@@ -77,8 +135,9 @@ public class NoticeHttpServer {
                 }
 
             } catch (Exception e) {
+                System.err.println("ERROR in /notices: " + e.getMessage());
                 e.printStackTrace();
-                String error = "{\"error\":\"Unable to fetch notices\"}";
+                String error = "{\"error\":\"Unable to fetch notices: " + e.getMessage().replace("\"", "\\\"") + "\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(500, error.length());
                 try (OutputStream os = exchange.getResponseBody()) {
@@ -94,6 +153,8 @@ public class NoticeHttpServer {
                 while ((line = reader.readLine()) != null) {
                     requestBody.append(line);
                 }
+
+                System.out.println("POST /notices - Request body: " + requestBody);
 
                 JSONObject json = new JSONObject(requestBody.toString());
                 String title = json.getString("title");
@@ -117,7 +178,13 @@ public class NoticeHttpServer {
                 noticeDAO.addNotice(notice);
 
                 // Send push notification
-                FCMSender.sendPushNotification(title, content);
+                try {
+                    FCMSender.sendPushNotification(title, content);
+                    System.out.println("✅ Push notification sent");
+                } catch (Exception e) {
+                    System.err.println("❌ Failed to send push notification: " + e.getMessage());
+                    e.printStackTrace();
+                }
 
                 String response = "{\"message\":\"Notice added and push notification sent\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -127,8 +194,9 @@ public class NoticeHttpServer {
                 }
 
             } catch (Exception e) {
+                System.err.println("ERROR in POST /notices: " + e.getMessage());
                 e.printStackTrace();
-                String error = "{\"error\":\"Failed to add notice\"}";
+                String error = "{\"error\":\"Failed to add notice: " + e.getMessage().replace("\"", "\\\"") + "\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(500, error.length());
                 try (OutputStream os = exchange.getResponseBody()) {
