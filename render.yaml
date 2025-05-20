@@ -6,7 +6,7 @@ services:
     envVars:
       - key: DATABASE_URL
         value: "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?user=postgres.qcfslaprrbxxefmigefe&password=Ganesh123@"
-      - key: DATABASE_USER
+      - key: DATABASE_USERNAME
         value: "postgres.qcfslaprrbxxefmigefe"
       - key: DATABASE_PASSWORD
         value: "Ganesh123@"
