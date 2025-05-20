@@ -16,19 +16,18 @@ public class DBConnection {
                 System.out.println("DATABASE_USERNAME=" + System.getenv("DATABASE_USERNAME"));
                 System.out.println("DATABASE_PASSWORD=" + (System.getenv("DATABASE_PASSWORD") != null ? "[set]" : "null"));
 
-
                 HikariConfig config = new HikariConfig();
 
-                // Load from environment
+                // ✅ Load from environment with fallback
                 String jdbcUrl = System.getenv("DATABASE_URL");
                 if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-                    jdbcUrl = "DATABASE_URL=jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require\n";
+                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require";
                     System.out.println("⚠️ Using default JDBC URL: " + jdbcUrl);
                 } else {
                     System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
                 }
 
-                String username = System.getenv("DATABASE_USERNAME");  // ✅ Make sure it's DATABASE_USERNAME
+                String username = System.getenv("DATABASE_USERNAME");
                 if (username == null || username.isEmpty()) {
                     username = "postgres.qcfslaprrbxxefmigefe";
                     System.out.println("⚠️ Using default username: " + username);
@@ -44,7 +43,7 @@ public class DBConnection {
                     System.out.println("✅ Using environment password");
                 }
 
-                // 🔍 Final debug output to verify values used
+                // 🔍 Confirm what is being used
                 System.out.println("📌 Supabase JDBC URL: " + jdbcUrl);
                 System.out.println("📌 Supabase USER: " + username);
                 System.out.println("📌 Supabase PASS: " + (password != null ? "[set]" : "null"));
@@ -60,35 +59,31 @@ public class DBConnection {
                 config.setMaxLifetime(1800000);
 
                 dataSource = new HikariDataSource(config);
-                try (Connection conn = dataSource.getConnection()) {
-                    if (!conn.isClosed()) {
-                        System.out.println("✅ Test DB connection succeeded");
-                    }
-                } catch (SQLException e) {
-                    System.err.println("❌ Immediate DB connection test failed: " + e.getMessage());
-                    e.printStackTrace(System.err);
-                    throw new RuntimeException("🚨 Immediate DB connection failed", e);
-                }
-
                 System.out.println("✅ Database connection pool initialized successfully");
 
-                // Test the connection immediately
+                // 🔍 Force test connection
                 try (Connection conn = dataSource.getConnection()) {
                     if (!conn.isClosed()) {
                         System.out.println("✅ Test DB connection succeeded");
+                    } else {
+                        System.err.println("❌ Connection was closed unexpectedly.");
                     }
+                } catch (Exception e) {
+                    System.err.println("❌ Immediate DB connection test failed: " + e.getMessage());
+                    e.printStackTrace(System.err);
+                    Throwable cause = e.getCause();
+                    while (cause != null) {
+                        System.err.println("Caused by: " + cause.getMessage());
+                        cause.printStackTrace(System.err);
+                        cause = cause.getCause();
+                    }
+                    // 🚨 Crash early
+                    throw new RuntimeException("🔥 Database connection test failed", e);
                 }
 
             } catch (Exception e) {
                 System.err.println("❌ Failed to initialize database connection pool: " + e.getMessage());
                 e.printStackTrace(System.err);
-                Throwable cause = e.getCause();
-                while (cause != null) {
-                    System.err.println("Caused by: " + cause.getMessage());
-                    cause.printStackTrace(System.err);
-                    cause = cause.getCause();
-                }
-
                 throw new RuntimeException("Database initialization failed", e);
             }
         }
