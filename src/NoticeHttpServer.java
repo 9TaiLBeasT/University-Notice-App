@@ -15,15 +15,17 @@ import org.json.JSONObject;
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
-        // ✅ Fix: Bind to all interfaces (required for Render/Docker)
-        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8000"));
+        // This is the correct way on Render
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
         server.createContext("/notices", new NoticeHandler());
-        server.setExecutor(null); // default executor
+        server.setExecutor(null);
+        System.out.println("🌐 Server started on port " + port);
         System.out.println("🌐 Listening on http://0.0.0.0:" + port);
-        server.start(); // ✅ This must reference the declared 'server'
+        server.start();
     }
+
 
     static class NoticeHandler implements HttpHandler {
         @Override
