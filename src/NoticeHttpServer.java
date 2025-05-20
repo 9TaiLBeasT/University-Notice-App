@@ -9,6 +9,11 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
@@ -95,10 +100,19 @@ public class NoticeHttpServer {
 
                 // New fields for calendar event
                 boolean isEvent = json.optBoolean("is_event", false);
-                String eventDateTime = json.optString("event_datetime", "");
+                String eventDateTimeStr = json.optString("event_datetime", "");
+                Timestamp eventTime = null;
+                if (!eventDateTimeStr.isEmpty()) {
+                    LocalDateTime localDateTime = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                    eventTime = Timestamp.valueOf(localDateTime);
+                }
 
                 // Create and save notice
-                Notice notice = new Notice(title, content, category, isEvent, eventDateTime);
+                Notice notice = new Notice(title, content, category);
+                notice.setEvent(isEvent);
+                notice.setEventTime(eventTime);
+
+
                 NoticeDAO noticeDAO = new NoticeDAO();
                 noticeDAO.addNotice(notice);
 
