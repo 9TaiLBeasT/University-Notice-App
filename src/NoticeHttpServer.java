@@ -22,18 +22,49 @@ public class NoticeHttpServer {
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
         server.createContext("/notices", new NoticeHandler());
+
+        // Add CORS handler for OPTIONS requests
+        server.createContext("/", new CorsHandler());
+
         server.setExecutor(null); // default executor
-        System.out.println("🚀 Server started on port " + port); // ✅ FIXED
+        System.out.println("🚀 Server started on port " + port);
         server.start();
     }
 
+    // Global CORS handler for preflight requests
+    static class CorsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
+            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            // Not an OPTIONS request, return 404
+            exchange.sendResponseHeaders(404, -1);
+        }
+    }
 
     static class NoticeHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers to all responses
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+
             String method = exchange.getRequestMethod();
 
             switch (method.toUpperCase()) {
+                case "OPTIONS":
+                    // Handle preflight CORS request
+                    exchange.sendResponseHeaders(204, -1);
+                    break;
                 case "GET":
                     handleGet(exchange);
                     break;
@@ -69,9 +100,11 @@ public class NoticeHttpServer {
 
                 String response = jsonArray.toString();
                 byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+
+                // Debug output
+                System.out.println("Sending " + notices.size() + " notices to client");
+
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.getResponseHeaders().set("Content-Length", String.valueOf(bytes.length));
                 exchange.sendResponseHeaders(200, bytes.length);
 
                 try (OutputStream os = exchange.getResponseBody()) {
@@ -80,11 +113,9 @@ public class NoticeHttpServer {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                String error = "{\"error\":\"Unable to fetch notices\"}";
+                String error = "{\"error\":\"Unable to fetch notices: " + e.getMessage() + "\"}";
                 byte[] bytes = error.getBytes(StandardCharsets.UTF_8);
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.getResponseHeaders().set("Content-Length", String.valueOf(bytes.length));
                 exchange.sendResponseHeaders(500, bytes.length);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(bytes);
@@ -124,10 +155,15 @@ public class NoticeHttpServer {
                 NoticeDAO noticeDAO = new NoticeDAO();
                 noticeDAO.addNotice(notice);
 
-                // Send push notification
-                FCMSender.sendPushNotification(title, content);
+                // Try to send push notification but don't fail if it doesn't work
+                try {
+                    FCMSender.sendPushNotification(title, content);
+                    System.out.println("Push notification sent successfully");
+                } catch (Exception e) {
+                    System.out.println("Failed to send push notification: " + e.getMessage());
+                }
 
-                String response = "{\"message\":\"Notice added and push notification sent\"}";
+                String response = "{\"message\":\"Notice added successfully\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {
@@ -136,7 +172,7 @@ public class NoticeHttpServer {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                String error = "{\"error\":\"Failed to add notice\"}";
+                String error = "{\"error\":\"Failed to add notice: " + e.getMessage() + "\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(500, error.length());
                 try (OutputStream os = exchange.getResponseBody()) {
