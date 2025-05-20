@@ -16,19 +16,18 @@ public class DBConnection {
                 System.out.println("DATABASE_USERNAME=" + System.getenv("DATABASE_USERNAME"));
                 System.out.println("DATABASE_PASSWORD=" + (System.getenv("DATABASE_PASSWORD") != null ? "[set]" : "null"));
 
-
                 HikariConfig config = new HikariConfig();
 
                 // Load from environment
                 String jdbcUrl = System.getenv("DATABASE_URL");
                 if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres";
+                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:5432/postgres";
                     System.out.println("⚠️ Using default JDBC URL: " + jdbcUrl);
                 } else {
                     System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
                 }
 
-                String username = System.getenv("DATABASE_USERNAME");  // ✅ Make sure it's DATABASE_USERNAME
+                String username = System.getenv("DATABASE_USERNAME");
                 if (username == null || username.isEmpty()) {
                     username = "postgres.qcfslaprrbxxefmigefe";
                     System.out.println("⚠️ Using default username: " + username);
@@ -44,7 +43,7 @@ public class DBConnection {
                     System.out.println("✅ Using environment password");
                 }
 
-                // 🔍 Final debug output to verify values used
+                // 🔍 Final debug output
                 System.out.println("📌 Supabase JDBC URL: " + jdbcUrl);
                 System.out.println("📌 Supabase USER: " + username);
                 System.out.println("📌 Supabase PASS: " + (password != null ? "[set]" : "null"));
@@ -62,11 +61,14 @@ public class DBConnection {
                 dataSource = new HikariDataSource(config);
                 System.out.println("✅ Database connection pool initialized successfully");
 
-                // Test the connection immediately
+                // ✅ Test the connection with full debug
                 try (Connection conn = dataSource.getConnection()) {
                     if (!conn.isClosed()) {
                         System.out.println("✅ Test DB connection succeeded");
                     }
+                } catch (Exception e) {
+                    System.err.println("❌ DB TEST FAILED: " + e.getMessage());
+                    e.printStackTrace(); // 🔍 Important for debugging on Render
                 }
 
             } catch (Exception e) {
