@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -61,32 +62,36 @@ public class NoticeHttpServer {
                     obj.put("content", notice.getContent());
                     obj.put("category", notice.getCategory());
                     obj.put("created_at", notice.getCreatedAt());
-
-                    // ➕ Include event fields
                     obj.put("is_event", notice.isEvent());
                     obj.put("event_datetime", notice.getEventTime() != null ? notice.getEventTime().toString() : "");
-
-
                     jsonArray.put(obj);
                 }
 
                 String response = jsonArray.toString();
+                byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, response.getBytes().length);
+                exchange.getResponseHeaders().set("Content-Length", String.valueOf(bytes.length));
+                exchange.sendResponseHeaders(200, bytes.length);
+
                 try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
+                    os.write(bytes);
                 }
 
             } catch (Exception e) {
                 e.printStackTrace();
                 String error = "{\"error\":\"Unable to fetch notices\"}";
+                byte[] bytes = error.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, error.length());
+                exchange.getResponseHeaders().set("Content-Length", String.valueOf(bytes.length));
+                exchange.sendResponseHeaders(500, bytes.length);
                 try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(error.getBytes());
+                    os.write(bytes);
                 }
             }
         }
+
 
         private void handlePost(HttpExchange exchange) throws IOException {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
