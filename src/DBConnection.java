@@ -11,6 +11,11 @@ public class DBConnection {
         if (dataSource == null) {
             try {
                 System.out.println("🔌 Initializing database connection pool...");
+                System.out.println("📢 Raw env values:");
+                System.out.println("DATABASE_URL=" + System.getenv("DATABASE_URL"));
+                System.out.println("DATABASE_USERNAME=" + System.getenv("DATABASE_USERNAME"));
+                System.out.println("DATABASE_PASSWORD=" + (System.getenv("DATABASE_PASSWORD") != null ? "[set]" : "null"));
+
 
                 HikariConfig config = new HikariConfig();
 
