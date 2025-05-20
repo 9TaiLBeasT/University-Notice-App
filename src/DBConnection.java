@@ -49,6 +49,10 @@ public class DBConnection {
                 config.setConnectionTimeout(10000);
                 config.setMaxLifetime(1800000);
 
+                System.out.println("📌 Supabase URL: " + jdbcUrl);
+                System.out.println("📌 Supabase Username: " + username);
+                System.out.println("📌 Supabase Password: " + (password != null ? "[REDACTED]" : "null"));
+
                 dataSource = new HikariDataSource(config);
                 System.out.println("✅ Database connection pool initialized successfully");
 
