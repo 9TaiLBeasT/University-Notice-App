@@ -1,7 +1,5 @@
 #!/bin/sh
-
 CLASSPATH=$(find lib -name '*.jar' | paste -sd ':' -):src
 echo "Starting server with classpath: $CLASSPATH"
-
-# This keeps the server alive and listens correctly
+echo "Using PORT=${PORT:-8000}"
 exec java -cp "$CLASSPATH" NoticeHttpServer
