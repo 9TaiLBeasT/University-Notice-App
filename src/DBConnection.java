@@ -14,8 +14,8 @@ public class DBConnection {
             config.setUsername("postgres.qcfslaprrbxxefmigefe");
             config.setPassword("Ganesh123@");
 
-            config.setMaximumPoolSize(1);
-            config.setMinimumIdle(0);
+            config.setMaximumPoolSize(5);
+            config.setMinimumIdle(1);
             config.setIdleTimeout(60000);
             config.setConnectionTimeout(30000);
             config.setMaxLifetime(1800000);

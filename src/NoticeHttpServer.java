@@ -17,7 +17,9 @@ import java.time.format.DateTimeFormatter;
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "8000"));
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+
         server.createContext("/notices", new NoticeHandler());
         server.setExecutor(null); // default executor
         System.out.println("🚀 Server started on port 8000");
