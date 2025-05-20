@@ -17,61 +17,55 @@ import org.json.JSONObject;
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
-        // ✅ Fix: Bind to all interfaces (required for Render/Docker)
-        int port = Integer.parseInt(System.getProperty("PORT", "8000"));
+        // ✅ Use environment variable instead of system property
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
         System.out.println("🌐 Starting server on port " + port);
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
         server.createContext("/notices", new NoticeHandler());
 
-        // Add a health check endpoint
-        server.createContext("/health", new HttpHandler() {
-            @Override
-            public void handle(HttpExchange exchange) throws IOException {
-                String response = "{\"status\":\"UP\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        // Health check
+        server.createContext("/health", exchange -> {
+            String response = "{\"status\":\"UP\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.sendResponseHeaders(200, response.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
+            }
+        });
+
+        // DB test endpoint
+        server.createContext("/test-db", exchange -> {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            try {
+                Connection conn = DBConnection.getConnection();
+                conn.close();
+                String response = "{\"status\":\"Database connection successful\"}";
                 exchange.sendResponseHeaders(200, response.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+            } catch (Exception e) {
+                String errorMessage = e.getMessage();
+                String response = "{\"status\":\"Database connection failed\",\"error\":\"" +
+                        errorMessage.replace("\"", "\\\"") + "\"}";
+                exchange.sendResponseHeaders(500, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
             }
         });
 
-        // Add a database test endpoint
-        server.createContext("/test-db", new HttpHandler() {
-            @Override
-            public void handle(HttpExchange exchange) throws IOException {
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-
-                try {
-                    Connection conn = DBConnection.getConnection();
-                    conn.close();
-                    String response = "{\"status\":\"Database connection successful\"}";
-                    exchange.sendResponseHeaders(200, response.length());
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response.getBytes());
-                    }
-                } catch (Exception e) {
-                    String errorMessage = e.getMessage();
-                    String response = "{\"status\":\"Database connection failed\",\"error\":\"" +
-                            errorMessage.replace("\"", "\\\"") + "\"}";
-                    exchange.sendResponseHeaders(500, response.length());
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(response.getBytes());
-                    }
-                }
-            }
-        });
-
         server.setExecutor(null); // default executor
-        System.out.println("🌐 Starting server on port " + port);
         System.out.println("🛠 PORT from environment = " + System.getenv("PORT"));
         server.start();
         System.out.println("🌐 Listening on http://0.0.0.0:" + port);
     }
+
 
     static class NoticeHandler implements HttpHandler {
         @Override
