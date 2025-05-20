@@ -22,9 +22,10 @@ public class NoticeHttpServer {
 
         server.createContext("/notices", new NoticeHandler());
         server.setExecutor(null); // default executor
-        System.out.println("🚀 Server started on port 8000");
+        System.out.println("🚀 Server started on port " + port); // ✅ FIXED
         server.start();
     }
+
 
     static class NoticeHandler implements HttpHandler {
         @Override
