@@ -20,7 +20,6 @@ public class NoticeDAO {
             System.out.println("✅ Notice added.");
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to add notice: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -32,8 +31,6 @@ public class NoticeDAO {
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-
-            System.out.println("✅ Database connection successful");
 
             while (rs.next()) {
                 Notice notice = new Notice(
@@ -48,12 +45,8 @@ public class NoticeDAO {
                 notices.add(notice);
             }
 
-            System.out.println("✅ Retrieved " + notices.size() + " notices");
-
         } catch (SQLException e) {
-            System.err.println("❌ Database error in getAllNotices(): " + e.getMessage());
             e.printStackTrace();
-            throw e; // Re-throw to ensure the calling code knows there was an error
         }
 
         return notices;
@@ -75,7 +68,6 @@ public class NoticeDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to delete notice: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -122,7 +114,6 @@ public class NoticeDAO {
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ Failed to update notice: " + e.getMessage());
             e.printStackTrace();
         }
     }

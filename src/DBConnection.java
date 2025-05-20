@@ -14,29 +14,56 @@ public class DBConnection {
 
                 HikariConfig config = new HikariConfig();
 
+                // Get connection info from environment variables with fallbacks
                 String jdbcUrl = System.getenv("DATABASE_URL");
-                String username = System.getenv("DATABASE_USER");
-                String password = System.getenv("DATABASE_PASSWORD");
+                if (jdbcUrl == null || jdbcUrl.isEmpty()) {
+                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres";
+                    System.out.println("⚠️ Using default JDBC URL: " + jdbcUrl);
+                } else {
+                    System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
+                }
 
-                if (jdbcUrl == null || username == null || password == null) {
-                    throw new RuntimeException("Missing DB environment variables");
+                String username = System.getenv("DATABASE_USER");
+                if (username == null || username.isEmpty()) {
+                    username = "postgres.qcfslaprrbxxefmigefe";
+                    System.out.println("⚠️ Using default username: " + username);
+                } else {
+                    System.out.println("✅ Using environment username: " + username);
+                }
+
+                String password = System.getenv("DATABASE_PASSWORD");
+                if (password == null || password.isEmpty()) {
+                    password = "Ganesh123@";
+                    System.out.println("⚠️ Using default password");
+                } else {
+                    System.out.println("✅ Using environment password");
                 }
 
                 config.setJdbcUrl(jdbcUrl);
                 config.setUsername(username);
                 config.setPassword(password);
 
+                // Set sensible HikariCP timeouts
                 config.setMaximumPoolSize(5);
                 config.setMinimumIdle(1);
-                config.setIdleTimeout(60000);
-                config.setConnectionTimeout(30000);
-                config.setMaxLifetime(1800000);
+                config.setIdleTimeout(60000);         // 60 seconds
+                config.setConnectionTimeout(10000);    // 10 seconds
+                config.setMaxLifetime(1800000);        // 30 minutes
 
                 dataSource = new HikariDataSource(config);
-                System.out.println("✅ Database pool initialized");
+                System.out.println("✅ Database connection pool initialized successfully");
+
+                // 🔍 Immediately test the connection
+                try (Connection testConn = dataSource.getConnection()) {
+                    if (!testConn.isClosed()) {
+                        System.out.println("✅ Test DB connection succeeded");
+                    }
+                }
+
             } catch (Exception e) {
+                System.err.println("❌ Failed to initialize database connection pool: " + e.getMessage());
                 e.printStackTrace();
-                throw new RuntimeException("❌ DB initialization failed: " + e.getMessage());
+                throw new RuntimeException("Database initialization failed", e);
             }
         }
     }
@@ -45,6 +72,14 @@ public class DBConnection {
         if (dataSource == null) {
             initDataSource();
         }
-        return dataSource.getConnection();
+        try {
+            Connection conn = dataSource.getConnection();
+            System.out.println("✅ Database connection obtained successfully");
+            return conn;
+        } catch (SQLException e) {
+            System.err.println("❌ Failed to get database connection: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
