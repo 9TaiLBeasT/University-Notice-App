@@ -1,14 +1,25 @@
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static final String URL = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres";
-    private static final String USER = "postgres.qcfslaprrbxxefmigefe";
-    private static final String PASSWORD = "Ganesh123@";
+    private static final HikariDataSource ds;
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+    static {
+        HikariConfig config = new HikariConfig();
+        config.setJdbcUrl("jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres");
+        config.setUsername("postgres.qcfslaprrbxxefmigefe");
+        config.setPassword("Ganesh123@");
+        config.setMaximumPoolSize(5); // Safe for Supabase free tier
+        config.setMinimumIdle(1);
+        config.setIdleTimeout(30000); // 30 seconds
+        config.setMaxLifetime(60000); // 1 minute
+        ds = new HikariDataSource(config);
     }
 
+    public static Connection getConnection() throws SQLException {
+        return ds.getConnection();
+    }
 }
