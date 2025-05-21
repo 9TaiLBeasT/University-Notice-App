@@ -21,7 +21,7 @@ public class DBConnection {
                 // ✅ Load from environment with fallback
                 String jdbcUrl = System.getenv("DATABASE_URL");
                 if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require";
+                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require\n";
                     System.out.println("⚠️ Using default JDBC URL: " + jdbcUrl);
                 } else {
                     System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
