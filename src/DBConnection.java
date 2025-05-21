@@ -1,106 +1,29 @@
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnection {
-    private static HikariDataSource dataSource;
+    private static final String JDBC_URL = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require";
+    private static final String USERNAME = "postgres.qcfslaprrbxxefmigefe";
+    private static final String PASSWORD = "Ganesh123@";
 
-    private static void initDataSource() {
-        if (dataSource == null) {
-            try {
-                System.out.println("🔌 Initializing database connection pool...");
-                System.out.println("📢 Raw env values:");
-                System.out.println("DATABASE_URL=" + System.getenv("DATABASE_URL"));
-                System.out.println("DATABASE_USERNAME=" + System.getenv("DATABASE_USERNAME"));
-                System.out.println("DATABASE_PASSWORD=" + (System.getenv("DATABASE_PASSWORD") != null ? "[set]" : "null"));
-
-                HikariConfig config = new HikariConfig();
-
-                // ✅ Load from environment with fallback
-                String jdbcUrl = System.getenv("DATABASE_URL");
-                if (jdbcUrl == null || jdbcUrl.isEmpty()) {
-                    jdbcUrl = "jdbc:postgresql://aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require\n";
-                    System.out.println("⚠️ Using default JDBC URL: " + jdbcUrl);
-                } else {
-                    System.out.println("✅ Using environment JDBC URL: " + jdbcUrl);
-                }
-
-                String username = System.getenv("DATABASE_USERNAME");
-                if (username == null || username.isEmpty()) {
-                    username = "postgres.qcfslaprrbxxefmigefe";
-                    System.out.println("⚠️ Using default username: " + username);
-                } else {
-                    System.out.println("✅ Using environment username: " + username);
-                }
-
-                String password = System.getenv("DATABASE_PASSWORD");
-                if (password == null || password.isEmpty()) {
-                    password = "Ganesh123@";
-                    System.out.println("⚠️ Using default password");
-                } else {
-                    System.out.println("✅ Using environment password");
-                }
-
-                // 🔍 Confirm what is being used
-                System.out.println("📌 Supabase JDBC URL: " + jdbcUrl);
-                System.out.println("📌 Supabase USER: " + username);
-                System.out.println("📌 Supabase PASS: " + (password != null ? "[set]" : "null"));
-
-                config.setJdbcUrl(jdbcUrl);
-                config.setUsername(username);
-                config.setPassword(password);
-
-                config.setMaximumPoolSize(5);
-                config.setMinimumIdle(1);
-                config.setIdleTimeout(60000);
-                config.setConnectionTimeout(10000);
-                config.setMaxLifetime(1800000);
-
-                dataSource = new HikariDataSource(config);
-                System.out.println("✅ Database connection pool initialized successfully");
-
-                // 🔍 Force test connection
-                try (Connection conn = dataSource.getConnection()) {
-                    if (!conn.isClosed()) {
-                        System.out.println("✅ Test DB connection succeeded");
-                    } else {
-                        System.err.println("❌ Connection was closed unexpectedly.");
-                    }
-                } catch (Exception e) {
-                    System.err.println("❌ Immediate DB connection test failed: " + e.getMessage());
-                    e.printStackTrace(System.err);
-                    Throwable cause = e.getCause();
-                    while (cause != null) {
-                        System.err.println("Caused by: " + cause.getMessage());
-                        cause.printStackTrace(System.err);
-                        cause = cause.getCause();
-                    }
-                    // 🚨 Crash early
-                    throw new RuntimeException("🔥 Database connection test failed", e);
-                }
-
-            } catch (Exception e) {
-                System.err.println("❌ Failed to initialize database connection pool: " + e.getMessage());
-                e.printStackTrace(System.err);
-                throw new RuntimeException("Database initialization failed", e);
-            }
+    static {
+        try {
+            Class.forName("org.postgresql.Driver"); // Ensure driver is loaded
+            System.out.println("✅ PostgreSQL JDBC Driver loaded.");
+        } catch (ClassNotFoundException e) {
+            System.err.println("❌ PostgreSQL JDBC Driver not found.");
+            e.printStackTrace();
         }
     }
 
     public static Connection getConnection() throws SQLException {
-        if (dataSource == null) {
-            initDataSource();
-        }
-        try {
-            Connection conn = dataSource.getConnection();
-            System.out.println("✅ Database connection obtained successfully");
-            return conn;
-        } catch (SQLException e) {
-            System.err.println("❌ Failed to get database connection: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        System.out.println("🔌 Connecting to DB with:");
+        System.out.println("URL: " + JDBC_URL);
+        System.out.println("USER: " + USERNAME);
+        System.out.println("PASS: [set]");
+        Connection conn = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
+        System.out.println("✅ Connection established.");
+        return conn;
     }
 }
