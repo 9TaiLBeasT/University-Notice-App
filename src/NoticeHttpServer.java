@@ -37,28 +37,38 @@ public class NoticeHttpServer {
         });
 
         // DB test endpoint
-        server.createContext("/test-db", exchange -> {
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
+        server.createContext("/test-db", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
 
-            try {
-                Connection conn = DBConnection.getConnection();
-                conn.close();
-                String response = "{\"status\":\"Database connection successful\"}";
-                exchange.sendResponseHeaders(200, response.length());
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
+                String response;
+                int statusCode;
+
+                try {
+                    long start = System.currentTimeMillis();
+                    Connection conn = DBConnection.getConnection();
+                    long end = System.currentTimeMillis();
+
+                    conn.close();
+                    response = "{\"status\":\"Database connection successful\",\"time_ms\":" + (end - start) + "}";
+                    statusCode = 200;
+
+                } catch (Exception e) {
+                    String errorMessage = e.getMessage() != null ? e.getMessage().replace("\"", "\\\"") : "Unknown error";
+                    e.printStackTrace();
+                    response = "{\"status\":\"Database connection failed\",\"error\":\"" + errorMessage + "\"}";
+                    statusCode = 500;
                 }
-            } catch (Exception e) {
-                String errorMessage = e.getMessage();
-                String response = "{\"status\":\"Database connection failed\",\"error\":\"" +
-                        errorMessage.replace("\"", "\\\"") + "\"}";
-                exchange.sendResponseHeaders(500, response.length());
+
+                exchange.sendResponseHeaders(statusCode, response.getBytes().length);
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(response.getBytes());
                 }
             }
         });
+
 
         server.setExecutor(null); // default executor
         System.out.println("🛠 PORT from environment = " + System.getenv("PORT"));
