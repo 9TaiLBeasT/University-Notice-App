@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.sql.SQLException;
 
 public class Main {
+    // 🔁 Replace only the main method part with this change:
     public static void main(String[] args) {
         NoticeDAO dao = new NoticeDAO();
         Scanner scanner = new Scanner(System.in);
@@ -25,9 +26,9 @@ public class Main {
             choice = scanner.nextInt();
             scanner.nextLine(); // consume newline
 
-            try {
-                switch (choice) {
-                    case 1:
+            switch (choice) {
+                case 1:
+                    try {
                         System.out.print("Enter Title: ");
                         String title = scanner.nextLine();
 
@@ -67,9 +68,13 @@ public class Main {
                         }
 
                         System.out.println("✅ Notice added successfully.");
-                        break;
+                    } catch (Exception e) {
+                        System.out.println("❌ Error: " + e.getMessage());
+                    }
+                    break;
 
-                    case 2:
+                case 2:
+                    try {
                         List<Notice> notices = dao.getAllNotices();
                         if (notices.isEmpty()) {
                             System.out.println("📭 No notices available.");
@@ -87,16 +92,24 @@ public class Main {
                                 }
                             }
                         }
-                        break;
+                    } catch (Exception e) {
+                        System.out.println("❌ Error: " + e.getMessage());
+                    }
+                    break;
 
-                    case 3:
+                case 3:
+                    try {
                         System.out.print("Enter Notice ID to delete: ");
                         int deleteId = scanner.nextInt();
                         dao.deleteNotice(deleteId);
                         System.out.println("🗑️ Notice deleted.");
-                        break;
+                    } catch (Exception e) {
+                        System.out.println("❌ Error: " + e.getMessage());
+                    }
+                    break;
 
-                    case 4:
+                case 4:
+                    try {
                         List<Notice> noticesToUpdate = dao.getAllNotices();
                         if (noticesToUpdate.isEmpty()) {
                             System.out.println("📭 No notices available to update.");
@@ -155,21 +168,21 @@ public class Main {
                         }
 
                         System.out.println("✅ Notice updated.");
-                        break;
+                    } catch (Exception e) {
+                        System.out.println("❌ Error: " + e.getMessage());
+                    }
+                    break;
 
-                    case 5:
-                        System.out.println("👋 Exiting... Goodbye!");
-                        break;
+                case 5:
+                    System.out.println("👋 Exiting... Goodbye!");
+                    break;
 
-                    default:
-                        System.out.println("❗ Invalid choice. Try again.");
-                }
-            } catch (SQLException e) {
-                System.out.println("❌ Database Error: " + e.getMessage());
+                default:
+                    System.out.println("❗ Invalid choice. Try again.");
             }
-
         } while (choice != 5);
 
         scanner.close();
     }
+
 }
