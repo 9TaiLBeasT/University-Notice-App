@@ -15,16 +15,17 @@ public class NoticeDAO {
             stmt.setString(3, notice.getCategory());
             stmt.setBoolean(4, notice.isEvent());
             stmt.setTimestamp(5, notice.getEventTime());
-            stmt.executeUpdate();
 
+            stmt.executeUpdate();
             System.out.println("✅ Notice added.");
 
         } catch (SQLException e) {
+            System.err.println("❌ SQL Error in addNotice: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public static List<Notice> getAllNotices() throws SQLException {
+    public static List<Notice> getAllNotices() {
         List<Notice> notices = new ArrayList<>();
         String sql = "SELECT * FROM notices ORDER BY id DESC";
 
@@ -46,7 +47,8 @@ public class NoticeDAO {
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("❌ SQL Error in getAllNotices: " + e.getMessage());
+            e.printStackTrace(); // <-- 🔥 Full trace for debugging
         }
 
         return notices;
@@ -68,6 +70,7 @@ public class NoticeDAO {
             }
 
         } catch (SQLException e) {
+            System.err.println("❌ SQL Error in deleteNotice: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -114,6 +117,7 @@ public class NoticeDAO {
             }
 
         } catch (SQLException e) {
+            System.err.println("❌ SQL Error in updateNotice: " + e.getMessage());
             e.printStackTrace();
         }
     }
