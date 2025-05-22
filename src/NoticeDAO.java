@@ -4,6 +4,7 @@ import java.util.List;
 
 public class NoticeDAO {
 
+    // Add a new notice to the DB
     public void addNotice(Notice notice) {
         String sql = "INSERT INTO notices (title, content, category, is_event, event_time) VALUES (?, ?, ?, ?, ?)";
 
@@ -25,9 +26,25 @@ public class NoticeDAO {
         }
     }
 
+    // Fetch all notices (for admin)
     public static List<Notice> getAllNotices() {
+        return getNoticesByQuery("SELECT * FROM notices ORDER BY id DESC");
+    }
+
+    // Fetch notices based on user role
+    public static List<Notice> getNoticesForRole(String role) {
+        String query = switch (role.toLowerCase()) {
+            case "student" -> "SELECT * FROM notices WHERE category ILIKE 'student' OR category ILIKE 'general' ORDER BY id DESC";
+            case "faculty" -> "SELECT * FROM notices WHERE category ILIKE 'faculty' OR category ILIKE 'general' ORDER BY id DESC";
+            default -> "SELECT * FROM notices WHERE category ILIKE 'general' ORDER BY id DESC";
+        };
+
+        return getNoticesByQuery(query);
+    }
+
+    // Common method to fetch and build Notice list
+    private static List<Notice> getNoticesByQuery(String sql) {
         List<Notice> notices = new ArrayList<>();
-        String sql = "SELECT * FROM notices ORDER BY id DESC";
 
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
@@ -43,17 +60,19 @@ public class NoticeDAO {
                 notice.setCreatedAt(rs.getTimestamp("created_at"));
                 notice.setEvent(rs.getBoolean("is_event"));
                 notice.setEventTime(rs.getTimestamp("event_time"));
+
                 notices.add(notice);
             }
 
         } catch (SQLException e) {
-            System.err.println("❌ SQL Error in getAllNotices: " + e.getMessage());
-            e.printStackTrace(); // <-- 🔥 Full trace for debugging
+            System.err.println("❌ SQL Error in getNoticesByQuery: " + e.getMessage());
+            e.printStackTrace();
         }
 
         return notices;
     }
 
+    // Delete notice by ID
     public void deleteNotice(int id) {
         String sql = "DELETE FROM notices WHERE id = ?";
 
@@ -75,6 +94,7 @@ public class NoticeDAO {
         }
     }
 
+    // Update notice
     public void updateNotice(int id, String newTitle, String newContent, String newCategory) {
         StringBuilder sql = new StringBuilder("UPDATE notices SET ");
         List<Object> params = new ArrayList<>();
@@ -109,7 +129,6 @@ public class NoticeDAO {
             }
 
             int rows = stmt.executeUpdate();
-
             if (rows > 0) {
                 System.out.println("✅ Notice updated.");
             } else {

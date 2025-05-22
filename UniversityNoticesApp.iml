@@ -35,5 +35,6 @@
     <orderEntry type="library" name="grpc-core-1.61.1" level="application" />
     <orderEntry type="library" name="google-auth-library-credentials-0.22.0" level="application" />
     <orderEntry type="library" name="HikariCP-5.0.1" level="application" />
+    <orderEntry type="library" name="jbcrypt-0.4" level="project" />
   </component>
 </module>

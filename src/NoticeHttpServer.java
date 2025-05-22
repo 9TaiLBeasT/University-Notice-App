@@ -1,11 +1,10 @@
-import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,83 +16,73 @@ import org.json.JSONObject;
 public class NoticeHttpServer {
 
     public static void main(String[] args) throws IOException {
-        // ✅ Use environment variable instead of system property
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
         System.out.println("🌐 Starting server on port " + port);
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
-        server.createContext("/notices", new NoticeHandler());
+        server.createContext("/notices", new SecureHandler()); // Now role-filtered
+        server.createContext("/signup", new AuthHandler());
+        server.createContext("/login", new AuthHandler());
 
-        // Health check
         server.createContext("/health", exchange -> {
             String response = "{\"status\":\"UP\"}";
+            addCorsHeaders(exchange);
             exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
             exchange.sendResponseHeaders(200, response.length());
             try (OutputStream os = exchange.getResponseBody()) {
                 os.write(response.getBytes());
             }
         });
 
-        // DB test endpoint
-        server.createContext("/test-db", new HttpHandler() {
-            @Override
-            public void handle(HttpExchange exchange) throws IOException {
-                exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
+        server.createContext("/test-db", exchange -> {
+            addCorsHeaders(exchange);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
 
-                String response;
-                int statusCode;
+            String response;
+            int statusCode;
 
-                try {
-                    long start = System.currentTimeMillis();
-                    Connection conn = DBConnection.getConnection();
-                    long end = System.currentTimeMillis();
+            try {
+                long start = System.currentTimeMillis();
+                Connection conn = DBConnection.getConnection();
+                long end = System.currentTimeMillis();
+                conn.close();
 
-                    conn.close();
-                    response = "{\"status\":\"Database connection successful\",\"time_ms\":" + (end - start) + "}";
-                    statusCode = 200;
+                response = "{\"status\":\"Database connected\",\"time_ms\":" + (end - start) + "}";
+                statusCode = 200;
+            } catch (Exception e) {
+                String errorMessage = e.getMessage() != null ? e.getMessage().replace("\"", "\\\"") : "Unknown";
+                response = "{\"status\":\"DB failed\",\"error\":\"" + errorMessage + "\"}";
+                statusCode = 500;
+            }
 
-                } catch (Exception e) {
-                    String errorMessage = e.getMessage() != null ? e.getMessage().replace("\"", "\\\"") : "Unknown error";
-                    e.printStackTrace();
-                    response = "{\"status\":\"Database connection failed\",\"error\":\"" + errorMessage + "\"}";
-                    statusCode = 500;
-                }
-
-                exchange.sendResponseHeaders(statusCode, response.getBytes().length);
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
-                }
+            exchange.sendResponseHeaders(statusCode, response.getBytes().length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
             }
         });
 
-
         server.setExecutor(null); // default executor
-        System.out.println("🛠 PORT from environment = " + System.getenv("PORT"));
+        System.out.println("🛠 Listening on http://0.0.0.0:" + port);
         server.start();
-        System.out.println("🌐 Listening on http://0.0.0.0:" + port);
     }
 
+    private static void addCorsHeaders(HttpExchange exchange) {
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+    }
 
     static class NoticeHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            // Add CORS headers to all responses
-            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+            addCorsHeaders(exchange);
 
             String method = exchange.getRequestMethod();
-
-            // Handle preflight requests
             if (method.equalsIgnoreCase("OPTIONS")) {
                 exchange.sendResponseHeaders(200, -1);
                 return;
             }
-
-            System.out.println("Received " + method + " request to /notices");
 
             switch (method.toUpperCase()) {
                 case "GET":
@@ -103,20 +92,25 @@ public class NoticeHttpServer {
                     handlePost(exchange);
                     break;
                 default:
-                    String error = "{\"error\":\"Unsupported method\"}";
-                    exchange.getResponseHeaders().set("Content-Type", "application/json");
-                    exchange.sendResponseHeaders(405, error.length());
-                    try (OutputStream os = exchange.getResponseBody()) {
-                        os.write(error.getBytes());
-                    }
+                    sendError(exchange, 405, "Unsupported method");
             }
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
             try {
-                System.out.println("GET /notices - Attempting to fetch notices...");
-                List<Notice> notices = NoticeDAO.getAllNotices();
-                System.out.println("Successfully fetched " + notices.size() + " notices");
+                // ✅ Extract `role` from query string
+                String query = exchange.getRequestURI().getQuery();
+                String role = "general";
+                if (query != null && query.contains("role=")) {
+                    for (String param : query.split("&")) {
+                        if (param.startsWith("role=")) {
+                            role = param.split("=")[1].toLowerCase();
+                            break;
+                        }
+                    }
+                }
+
+                List<Notice> notices = NoticeDAO.getNoticesForRole(role);
 
                 JSONArray jsonArray = new JSONArray();
                 for (Notice notice : notices) {
@@ -126,30 +120,21 @@ public class NoticeHttpServer {
                     obj.put("content", notice.getContent());
                     obj.put("category", notice.getCategory());
                     obj.put("created_at", notice.getCreatedAt());
-
-                    // ➕ Include event fields
                     obj.put("is_event", notice.isEvent());
                     obj.put("event_datetime", notice.getEventTime() != null ? notice.getEventTime().toString() : "");
-
                     jsonArray.put(obj);
                 }
 
-                String response = jsonArray.toString();
+                byte[] responseBytes = jsonArray.toString().getBytes();
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(200, response.getBytes().length);
+                exchange.sendResponseHeaders(200, responseBytes.length);
                 try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(response.getBytes());
+                    os.write(responseBytes);
                 }
 
             } catch (Exception e) {
-                System.err.println("ERROR in /notices: " + e.getMessage());
                 e.printStackTrace();
-                String error = "{\"error\":\"Unable to fetch notices: " + e.getMessage().replace("\"", "\\\"") + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, error.length());
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(error.getBytes());
-                }
+                sendError(exchange, 500, "Failed to fetch notices: " + e.getMessage());
             }
         }
 
@@ -161,39 +146,33 @@ public class NoticeHttpServer {
                     requestBody.append(line);
                 }
 
-                System.out.println("POST /notices - Request body: " + requestBody);
-
                 JSONObject json = new JSONObject(requestBody.toString());
+
                 String title = json.getString("title");
                 String content = json.getString("content");
                 String category = json.optString("category", "General");
-
                 boolean isEvent = json.optBoolean("is_event", false);
                 String eventDateTimeStr = json.optString("event_datetime", "");
+
                 Timestamp eventTime = null;
                 if (!eventDateTimeStr.isEmpty()) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-                    eventTime = Timestamp.valueOf(localDateTime);
+                    LocalDateTime dt = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                    eventTime = Timestamp.valueOf(dt);
                 }
 
-                // Create and save notice
                 Notice notice = new Notice(title, content, category);
                 notice.setEvent(isEvent);
                 notice.setEventTime(eventTime);
 
-                NoticeDAO noticeDAO = new NoticeDAO();
-                noticeDAO.addNotice(notice);
+                new NoticeDAO().addNotice(notice);
 
-                // Send push notification
                 try {
                     FCMSender.sendPushNotification(title, content);
-                    System.out.println("✅ Push notification sent");
                 } catch (Exception e) {
-                    System.err.println("❌ Failed to send push notification: " + e.getMessage());
-                    e.printStackTrace();
+                    System.err.println("❌ Push failed: " + e.getMessage());
                 }
 
-                String response = "{\"message\":\"Notice added and push notification sent\"}";
+                String response = "{\"message\":\"Notice added and notification sent\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
                 exchange.sendResponseHeaders(200, response.length());
                 try (OutputStream os = exchange.getResponseBody()) {
@@ -201,14 +180,17 @@ public class NoticeHttpServer {
                 }
 
             } catch (Exception e) {
-                System.err.println("ERROR in POST /notices: " + e.getMessage());
                 e.printStackTrace();
-                String error = "{\"error\":\"Failed to add notice: " + e.getMessage().replace("\"", "\\\"") + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, error.length());
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(error.getBytes());
-                }
+                sendError(exchange, 500, "Failed to add notice: " + e.getMessage());
+            }
+        }
+
+        private void sendError(HttpExchange exchange, int code, String message) throws IOException {
+            String error = "{\"error\":\"" + message.replace("\"", "\\\"") + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(code, error.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(error.getBytes());
             }
         }
     }
