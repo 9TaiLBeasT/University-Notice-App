@@ -5,15 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="56fc896c-92c5-4e2c-b6d4-3e87be24549b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/AuthHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/SecureHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/UserDAO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UniversityNoticesApp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/UniversityNoticesApp.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/NoticeDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/NoticeDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/NoticeHttpServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/NoticeHttpServer.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
