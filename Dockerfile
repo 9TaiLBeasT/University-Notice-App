@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y curl && \
     # Required for Firebase `ApiFuture`
     curl -o lib/extras/api-common-1.10.0.jar https://repo1.maven.org/maven2/com/google/api/api-common/1.10.0/api-common-1.10.0.jar && \
     curl -o lib/extras/google-api-client-1.34.1.jar https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.34.1/google-api-client-1.34.1.jar && \
+    curl -o lib/extras/slf4j-api-1.7.36.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar && \
+    curl -o lib/extras/slf4j-simple-1.7.36.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar && \
     \
     # Supabase / PostgreSQL / HikariCP / bcrypt
     curl -o lib/extras/postgresql-42.7.5.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.5/postgresql-42.7.5.jar && \
