@@ -13,7 +13,7 @@ public class FCMSender {
 
     static {
         try {
-            FileInputStream serviceAccount = new FileInputStream("./serviceAccountKey.json");
+            FileInputStream serviceAccount = new FileInputStream("./src/serviceAccountKey.json");
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
