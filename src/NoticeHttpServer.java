@@ -167,10 +167,14 @@ public class NoticeHttpServer {
                 new NoticeDAO().addNotice(notice);
 
                 try {
+                    System.out.println("📤 Calling FCMSender...");
                     FCMSender.sendPushNotification(title, content);
+                    System.out.println("✅ FCMSender.sendPushNotification() called.");
                 } catch (Exception e) {
                     System.err.println("❌ Push failed: " + e.getMessage());
+                    e.printStackTrace(); // Add this to see the full error stack
                 }
+
 
                 String response = "{\"message\":\"Notice added and notification sent\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
