@@ -51,6 +51,10 @@ RUN apt-get update && apt-get install -y curl && \
     # Protobuf
     curl -o lib/extras/protobuf-java-3.21.12.jar https://repo1.maven.org/maven2/com/google/protobuf/protobuf-java/3.21.12/protobuf-java-3.21.12.jar && \
     \
+    # SLF4J logging
+    curl -o lib/extras/slf4j-api-2.0.5.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-api/2.0.5/slf4j-api-2.0.5.jar && \
+    curl -o lib/extras/slf4j-simple-2.0.5.jar https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/2.0.5/slf4j-simple-2.0.5.jar && \
+    \
     # Cleanup
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
