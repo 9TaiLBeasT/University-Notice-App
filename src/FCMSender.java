@@ -31,6 +31,8 @@ public class FCMSender {
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
                 System.out.println("✅ Firebase initialized successfully from env var.");
+            } else {
+                System.out.println("⚠️ FirebaseApp already initialized.");
             }
 
         } catch (Exception e) {
