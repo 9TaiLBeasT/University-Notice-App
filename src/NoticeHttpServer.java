@@ -65,6 +65,9 @@ public class NoticeHttpServer {
         server.setExecutor(null); // default executor
         System.out.println("🛠 Listening on http://0.0.0.0:" + port);
         server.start();
+
+        System.out.println("📤 Sending DEBUG push test...");
+        FCMSender.sendPushNotification("Debug Test", "If you see this, FCM is working.");
     }
 
     private static void addCorsHeaders(HttpExchange exchange) {
