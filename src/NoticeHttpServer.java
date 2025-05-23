@@ -21,7 +21,7 @@ public class NoticeHttpServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
-        server.createContext("/notices", new SecureHandler()); // Now role-filtered
+        server.createContext("/notices", new NoticeHandler());// Now role-filtered
         server.createContext("/signup", new AuthHandler());
         server.createContext("/login", new AuthHandler());
 
