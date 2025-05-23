@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y curl && \
     curl -o lib/extras/postgresql-42.7.5.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.5/postgresql-42.7.5.jar && \
     curl -o lib/extras/HikariCP-5.0.1.jar https://repo1.maven.org/maven2/com/zaxxer/HikariCP/5.0.1/HikariCP-5.0.1.jar && \
     curl -o lib/extras/bcrypt-0.4.jar https://repo1.maven.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar && \
-    curl -o lib/extras/google-api-core-1.34.0.jar https://repo1.maven.org/maven2/com/google/api/grpc/google-api-core/1.34.0/google-api-core-1.34.0.jar\
+    curl -o lib/extras/google-api-core-1.34.0.jar https://repo1.maven.org/maven2/com/google/api/grpc/google-api-core/1.34.0/google-api-core-1.34.0.jar && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
