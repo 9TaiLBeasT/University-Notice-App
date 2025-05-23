@@ -6,14 +6,14 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 
 import java.io.FileInputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FCMSender {
 
     static {
         try {
-            FileInputStream serviceAccount = new FileInputStream("./src/serviceAccountKey.json");
+            // ✅ Use environment variable path
+            String path = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            FileInputStream serviceAccount = new FileInputStream(path);
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -22,6 +22,9 @@ public class FCMSender {
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
+
+            System.out.println("✅ Firebase initialized with " + path);
+
         } catch (Exception e) {
             System.err.println("❌ Firebase initialization failed:");
             e.printStackTrace();
@@ -30,18 +33,12 @@ public class FCMSender {
 
     public static void sendPushNotification(String title, String body) {
         try {
-            // Optional: send both notification + data
-            Map<String, String> dataPayload = new HashMap<>();
-            dataPayload.put("title", title);
-            dataPayload.put("body", body);
-
             Message message = Message.builder()
-                    .setTopic("all")
                     .setNotification(Notification.builder()
                             .setTitle(title)
                             .setBody(body)
                             .build())
-                    .putAllData(dataPayload)
+                    .setTopic("all")
                     .build();
 
             String response = FirebaseMessaging.getInstance().send(message);
