@@ -67,7 +67,7 @@ public class NoticeHttpServer {
         server.start();
 
         System.out.println("📤 Sending DEBUG push test...");
-        FCMSender.sendPushNotification("Debug Test", "If you see this, FCM is working.");
+        //FCMSender.sendPushNotification("Debug Test", "If you see this, FCM is working.");
     }
 
     private static void addCorsHeaders(HttpExchange exchange) {
