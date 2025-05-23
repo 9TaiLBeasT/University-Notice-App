@@ -13,7 +13,7 @@ public class FCMSender {
         try {
             // ✅ Use environment variable path
             String path = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-            FileInputStream serviceAccount = new FileInputStream(path);
+            FileInputStream serviceAccount = new FileInputStream("serviceAccountKey.json");
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
