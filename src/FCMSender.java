@@ -21,6 +21,7 @@ public class FCMSender {
             }
 
             System.out.println("📦 Credentials JSON loaded from env. Length: " + json.length());
+            System.out.flush();
 
             FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(
@@ -35,15 +36,20 @@ public class FCMSender {
                 System.out.println("⚠️ FirebaseApp already initialized.");
             }
 
+            System.out.flush();
+
         } catch (Exception e) {
             System.err.println("❌ Firebase initialization failed:");
             e.printStackTrace();
+            System.err.flush();
         }
     }
 
     public static void sendPushNotification(String title, String body) {
         try {
             System.out.println("📤 Attempting to send FCM push...");
+            System.out.flush();
+
             Message message = Message.builder()
                     .setNotification(Notification.builder()
                             .setTitle(title)
@@ -54,10 +60,12 @@ public class FCMSender {
 
             String response = FirebaseMessaging.getInstance().send(message);
             System.out.println("✅ Push notification sent successfully. Response: " + response);
+            System.out.flush();
 
         } catch (Exception e) {
             System.err.println("❌ Failed to send push notification:");
             e.printStackTrace();
+            System.err.flush();
         }
     }
 }
