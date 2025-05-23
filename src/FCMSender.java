@@ -6,6 +6,8 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 
 import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FCMSender {
 
@@ -17,7 +19,6 @@ public class FCMSender {
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
-            // Avoid duplicate initialization
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
@@ -29,12 +30,18 @@ public class FCMSender {
 
     public static void sendPushNotification(String title, String body) {
         try {
+            // Optional: send both notification + data
+            Map<String, String> dataPayload = new HashMap<>();
+            dataPayload.put("title", title);
+            dataPayload.put("body", body);
+
             Message message = Message.builder()
+                    .setTopic("all")
                     .setNotification(Notification.builder()
                             .setTitle(title)
                             .setBody(body)
                             .build())
-                    .setTopic("all")
+                    .putAllData(dataPayload)
                     .build();
 
             String response = FirebaseMessaging.getInstance().send(message);
