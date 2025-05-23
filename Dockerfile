@@ -20,9 +20,6 @@ RUN apt-get update && apt-get install -y curl && \
 RUN CLASSPATH=$(find lib -name "*.jar" | paste -sd ":" -):src && \
     javac -cp "$CLASSPATH" src/*.java
 
-# Environment variable for Firebase/FCM (used in FCM push)
-ENV GOOGLE_APPLICATION_CREDENTIALS=serviceAccountKey.json
-
 # Expose the port used by the backend
 EXPOSE 10000
 

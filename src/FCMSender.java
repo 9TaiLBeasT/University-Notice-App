@@ -5,25 +5,29 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
+import java.nio.charset.StandardCharsets;
 
 public class FCMSender {
 
     static {
         try {
-            // ✅ Use environment variable path
-            String path = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
-            FileInputStream serviceAccount = new FileInputStream("serviceAccountKey.json");
+            String json = System.getenv("FIREBASE_CREDENTIALS_JSON");
+            if (json == null || json.isEmpty()) {
+                throw new RuntimeException("Missing FIREBASE_CREDENTIALS_JSON env var");
+            }
 
             FirebaseOptions options = new FirebaseOptions.Builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .setCredentials(GoogleCredentials.fromStream(new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))))
                     .build();
+
 
             if (FirebaseApp.getApps().isEmpty()) {
                 FirebaseApp.initializeApp(options);
             }
 
-            System.out.println("✅ Firebase initialized with " + path);
+            //System.out.println("✅ Firebase initialized with " + path);
 
         } catch (Exception e) {
             System.err.println("❌ Firebase initialization failed:");
