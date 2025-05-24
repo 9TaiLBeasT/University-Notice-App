@@ -138,21 +138,35 @@ public class Main {
                         String updatedContent = null;
                         String updatedCategory = null;
 
+                        // Prompt for event info
+                        System.out.print("Is this still an event notice? (yes/no): ");
+                        boolean isEvent = scanner.nextLine().equalsIgnoreCase("yes");
+
+                        Timestamp eventTime = null;
+                        if (isEvent) {
+                            System.out.print("Enter new Event DateTime (e.g., 2025-05-02T14:00): ");
+                            String eventDateTimeStr = scanner.nextLine();
+                            try {
+                                LocalDateTime eventDateTime = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                                eventTime = Timestamp.valueOf(eventDateTime);
+                            } catch (Exception e) {
+                                System.out.println("❌ Invalid format. Use: yyyy-MM-ddTHH:mm (e.g. 2025-05-02T14:00)");
+                                break;
+                            }
+                        }
+
                         switch (updateChoice) {
                             case 1:
                                 System.out.print("Enter New Title: ");
                                 updatedTitle = scanner.nextLine();
-                                dao.updateNotice(updateId, updatedTitle, null, null);
                                 break;
                             case 2:
                                 System.out.print("Enter New Content: ");
                                 updatedContent = scanner.nextLine();
-                                dao.updateNotice(updateId, null, updatedContent, null);
                                 break;
                             case 3:
                                 System.out.print("Enter New Category: ");
                                 updatedCategory = scanner.nextLine();
-                                dao.updateNotice(updateId, null, null, updatedCategory);
                                 break;
                             case 4:
                                 System.out.print("Enter New Title: ");
@@ -161,13 +175,15 @@ public class Main {
                                 updatedContent = scanner.nextLine();
                                 System.out.print("Enter New Category: ");
                                 updatedCategory = scanner.nextLine();
-                                dao.updateNotice(updateId, updatedTitle, updatedContent, updatedCategory);
                                 break;
                             default:
                                 System.out.println("❌ Invalid update option.");
+                                break;
                         }
 
+                        dao.updateNotice(updateId, updatedTitle, updatedContent, updatedCategory, isEvent, eventTime);
                         System.out.println("✅ Notice updated.");
+
                     } catch (Exception e) {
                         System.out.println("❌ Error: " + e.getMessage());
                     }
