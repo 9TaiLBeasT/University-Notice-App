@@ -73,7 +73,8 @@ public class NoticeDAO {
     }
 
     // Delete notice by ID
-    public void deleteNotice(int id) {
+    // Delete notice by ID
+    public boolean deleteNotice(int id) {
         String sql = "DELETE FROM notices WHERE id = ?";
 
         try (Connection conn = DBConnection.getConnection();
@@ -84,15 +85,19 @@ public class NoticeDAO {
 
             if (rows > 0) {
                 System.out.println("🗑️ Notice deleted.");
+                return true;
             } else {
                 System.out.println("❌ No notice found with ID: " + id);
+                return false;
             }
 
         } catch (SQLException e) {
             System.err.println("❌ SQL Error in deleteNotice: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
     }
+
 
     // Update notice
     public void updateNotice(int id, String newTitle, String newContent, String newCategory) {

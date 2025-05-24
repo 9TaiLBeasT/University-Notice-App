@@ -94,9 +94,13 @@ public class NoticeHttpServer {
                 case "POST":
                     handlePost(exchange);
                     break;
+                case "DELETE":
+                    handleDelete(exchange);
+                    break;
                 default:
                     sendError(exchange, 405, "Unsupported method");
             }
+
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
@@ -200,5 +204,41 @@ public class NoticeHttpServer {
                 os.write(error.getBytes());
             }
         }
+
+        private void handleDelete(HttpExchange exchange) throws IOException {
+            try {
+                String path = exchange.getRequestURI().getPath(); // /notices/123
+                String[] parts = path.split("/");
+                if (parts.length < 3) {
+                    sendError(exchange, 400, "Invalid URL format. Expected /notices/{id}");
+                    return;
+                }
+
+                int id = Integer.parseInt(parts[2]);
+
+                boolean deleted = new NoticeDAO().deleteNotice(id);
+
+                String response = deleted
+                        ? "{\"message\":\"Deleted successfully\"}"
+                        : "{\"error\":\"Notice not found or not deleted\"}";
+
+                int statusCode = deleted ? 200 : 404;
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(statusCode, response.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(response.getBytes());
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                String error = "{\"error\":\"Failed to delete notice: " + e.getMessage().replace("\"", "\\\"") + "\"}";
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(500, error.length());
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(error.getBytes());
+                }
+            }
+        }
+
     }
 }
