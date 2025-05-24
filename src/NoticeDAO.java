@@ -100,7 +100,7 @@ public class NoticeDAO {
 
 
     // Update notice
-    public boolean updateNotice(int id, String newTitle, String newContent, String newCategory) {
+    public boolean updateNotice(int id, String newTitle, String newContent, String newCategory, Boolean isEvent, Timestamp eventTime) {
         StringBuilder sql = new StringBuilder("UPDATE notices SET ");
         List<Object> params = new ArrayList<>();
 
@@ -117,11 +117,12 @@ public class NoticeDAO {
             params.add(newCategory);
         }
 
-        if (params.isEmpty()) {
-            System.out.println("❌ Nothing to update.");
-            return false;
-        }
+        // These must be explicitly updated even if unchanged
+        sql.append("is_event = ?, event_time = ?, ");
+        params.add(isEvent != null ? isEvent : false);  // default to false if null
+        params.add(eventTime); // can be null
 
+        // Final WHERE clause
         sql.setLength(sql.length() - 2); // remove trailing comma
         sql.append(" WHERE id = ?");
         params.add(id);
@@ -148,4 +149,5 @@ public class NoticeDAO {
             return false;
         }
     }
+
 }

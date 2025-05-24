@@ -264,8 +264,18 @@ public class NoticeHttpServer {
             String title = json.optString("title", null);
             String content = json.optString("content", null);
             String category = json.optString("category", null);
+            boolean isEvent = json.optBoolean("is_event", false);
+            String eventDateTimeStr = json.optString("event_datetime", "");
 
-            boolean success = new NoticeDAO().updateNotice(id, title, content, category);
+            Timestamp eventTime = null;
+            if (!eventDateTimeStr.isEmpty()) {
+                LocalDateTime dt = LocalDateTime.parse(eventDateTimeStr);
+                eventTime = Timestamp.valueOf(dt);
+            }
+
+            boolean success = new NoticeDAO().updateNotice(id, title, content, category, isEvent, eventTime);
+
+
 
             String response = success ? "{\"message\":\"Updated\"}" : "{\"error\":\"Not found\"}";
             int code = success ? 200 : 404;
