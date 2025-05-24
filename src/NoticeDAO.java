@@ -100,7 +100,7 @@ public class NoticeDAO {
 
 
     // Update notice
-    public void updateNotice(int id, String newTitle, String newContent, String newCategory) {
+    public boolean updateNotice(int id, String newTitle, String newContent, String newCategory) {
         StringBuilder sql = new StringBuilder("UPDATE notices SET ");
         List<Object> params = new ArrayList<>();
 
@@ -119,10 +119,10 @@ public class NoticeDAO {
 
         if (params.isEmpty()) {
             System.out.println("❌ Nothing to update.");
-            return;
+            return false;
         }
 
-        sql.setLength(sql.length() - 2); // remove last comma
+        sql.setLength(sql.length() - 2); // remove trailing comma
         sql.append(" WHERE id = ?");
         params.add(id);
 
@@ -136,13 +136,16 @@ public class NoticeDAO {
             int rows = stmt.executeUpdate();
             if (rows > 0) {
                 System.out.println("✅ Notice updated.");
+                return true;
             } else {
                 System.out.println("❌ No notice found with ID: " + id);
+                return false;
             }
 
         } catch (SQLException e) {
             System.err.println("❌ SQL Error in updateNotice: " + e.getMessage());
             e.printStackTrace();
+            return false;
         }
     }
 }

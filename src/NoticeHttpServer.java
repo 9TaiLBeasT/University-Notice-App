@@ -97,6 +97,9 @@ public class NoticeHttpServer {
                 case "DELETE":
                     handleDelete(exchange);
                     break;
+                case "PUT":
+                    handlePut(exchange);
+                    break;
                 default:
                     sendError(exchange, 405, "Unsupported method");
             }
@@ -237,6 +240,40 @@ public class NoticeHttpServer {
                 try (OutputStream os = exchange.getResponseBody()) {
                     os.write(error.getBytes());
                 }
+            }
+        }
+
+        private void handlePut(HttpExchange exchange) throws IOException {
+            String path = exchange.getRequestURI().getPath();
+            String[] parts = path.split("/");
+            if (parts.length != 3) {
+                sendError(exchange, 400, "Invalid path");
+                return;
+            }
+
+            int id = Integer.parseInt(parts[2]);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()));
+            StringBuilder body = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                body.append(line);
+            }
+
+            JSONObject json = new JSONObject(body.toString());
+
+            String title = json.optString("title", null);
+            String content = json.optString("content", null);
+            String category = json.optString("category", null);
+
+            boolean success = new NoticeDAO().updateNotice(id, title, content, category);
+
+            String response = success ? "{\"message\":\"Updated\"}" : "{\"error\":\"Not found\"}";
+            int code = success ? 200 : 404;
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(code, response.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(response.getBytes());
             }
         }
 
