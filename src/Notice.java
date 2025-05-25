@@ -8,7 +8,9 @@ public class Notice {
     private Timestamp createdAt;
     private boolean isEvent;
     private Timestamp eventTime;
-    private String fileUrl; // ✅ New field
+    private String fileUrl; // ✅ Add this field
+    private String date;
+    private String eventDateTime;
 
     public Notice(String title, String content, String category) {
         this.title = title;
@@ -16,11 +18,14 @@ public class Notice {
         this.category = category;
     }
 
-    public Notice(String title, String content, String category, boolean isEvent, String eventDateTime) {
+    public Notice(int id, String title, String content, String category, String date, boolean isEvent, String eventDateTime) {
+        this.id = id;
         this.title = title;
         this.content = content;
         this.category = category;
+        this.date = date;
         this.isEvent = isEvent;
+        this.eventDateTime = eventDateTime;
 
         try {
             if (eventDateTime != null && !eventDateTime.trim().isEmpty()) {
@@ -32,7 +37,7 @@ public class Notice {
         }
     }
 
-    // Getters & Setters
+    // Getters and setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -49,6 +54,6 @@ public class Notice {
     public Timestamp getEventTime() { return eventTime; }
     public void setEventTime(Timestamp eventTime) { this.eventTime = eventTime; }
 
-    public String getFileUrl() { return fileUrl; }
-    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; } // ✅ new
+    public String getFileUrl() { return fileUrl; } // ✅ Getter
+    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; } // ✅ Setter
 }
