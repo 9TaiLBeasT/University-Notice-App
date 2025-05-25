@@ -4,9 +4,8 @@ import java.util.List;
 
 public class NoticeDAO {
 
-    // Add a new notice to the DB
     public void addNotice(Notice notice) {
-        String sql = "INSERT INTO notices (title, content, category, is_event, event_time) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO notices (title, content, category, is_event, event_time, file_url) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -16,6 +15,7 @@ public class NoticeDAO {
             stmt.setString(3, notice.getCategory());
             stmt.setBoolean(4, notice.isEvent());
             stmt.setTimestamp(5, notice.getEventTime());
+            stmt.setString(6, notice.getFileUrl()); // ✅
 
             stmt.executeUpdate();
             System.out.println("✅ Notice added.");
@@ -26,23 +26,20 @@ public class NoticeDAO {
         }
     }
 
-    // Fetch all notices (for admin)
     public static List<Notice> getAllNotices() {
         return getNoticesByQuery("SELECT * FROM notices ORDER BY id DESC");
     }
 
-    // Fetch notices based on user role
     public static List<Notice> getNoticesForRole(String role) {
         String query = switch (role.toLowerCase()) {
             case "student" -> "SELECT * FROM notices WHERE category ILIKE 'student' OR category ILIKE 'general' ORDER BY id DESC";
             case "faculty" -> "SELECT * FROM notices WHERE category ILIKE 'faculty' OR category ILIKE 'general' ORDER BY id DESC";
+            case "admin" -> "SELECT * FROM notices ORDER BY id DESC";
             default -> "SELECT * FROM notices WHERE category ILIKE 'general' ORDER BY id DESC";
         };
-
         return getNoticesByQuery(query);
     }
 
-    // Common method to fetch and build Notice list
     private static List<Notice> getNoticesByQuery(String sql) {
         List<Notice> notices = new ArrayList<>();
 
@@ -60,6 +57,7 @@ public class NoticeDAO {
                 notice.setCreatedAt(rs.getTimestamp("created_at"));
                 notice.setEvent(rs.getBoolean("is_event"));
                 notice.setEventTime(rs.getTimestamp("event_time"));
+                notice.setFileUrl(rs.getString("file_url")); // ✅
 
                 notices.add(notice);
             }
@@ -72,8 +70,6 @@ public class NoticeDAO {
         return notices;
     }
 
-    // Delete notice by ID
-    // Delete notice by ID
     public boolean deleteNotice(int id) {
         String sql = "DELETE FROM notices WHERE id = ?";
 
@@ -98,9 +94,7 @@ public class NoticeDAO {
         }
     }
 
-
-    // Update notice
-    public boolean updateNotice(int id, String newTitle, String newContent, String newCategory, Boolean isEvent, Timestamp eventTime) {
+    public boolean updateNotice(int id, String newTitle, String newContent, String newCategory, Boolean isEvent, Timestamp eventTime, String fileUrl) {
         StringBuilder sql = new StringBuilder("UPDATE notices SET ");
         List<Object> params = new ArrayList<>();
 
@@ -117,12 +111,11 @@ public class NoticeDAO {
             params.add(newCategory);
         }
 
-        // These must be explicitly updated even if unchanged
-        sql.append("is_event = ?, event_time = ?, ");
-        params.add(isEvent != null ? isEvent : false);  // default to false if null
-        params.add(eventTime); // can be null
+        sql.append("is_event = ?, event_time = ?, file_url = ?, ");
+        params.add(isEvent != null ? isEvent : false); // ✅
+        params.add(eventTime); // ✅
+        params.add(fileUrl); // ✅
 
-        // Final WHERE clause
         sql.setLength(sql.length() - 2); // remove trailing comma
         sql.append(" WHERE id = ?");
         params.add(id);
@@ -149,5 +142,4 @@ public class NoticeDAO {
             return false;
         }
     }
-
 }

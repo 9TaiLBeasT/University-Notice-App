@@ -21,7 +21,7 @@ public class NoticeHttpServer {
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
-        server.createContext("/notices", new NoticeHandler());// Now role-filtered
+        server.createContext("/notices", new NoticeHandler());
         server.createContext("/signup", new AuthHandler());
         server.createContext("/login", new AuthHandler());
 
@@ -62,17 +62,14 @@ public class NoticeHttpServer {
             }
         });
 
-        server.setExecutor(null); // default executor
+        server.setExecutor(null);
         System.out.println("🛠 Listening on http://0.0.0.0:" + port);
         server.start();
-
-        System.out.println("📤 Sending DEBUG push test...");
-        //FCMSender.sendPushNotification("Debug Test", "If you see this, FCM is working.");
     }
 
     private static void addCorsHeaders(HttpExchange exchange) {
         exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
-        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS");
         exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type,Authorization");
     }
 
@@ -88,27 +85,16 @@ public class NoticeHttpServer {
             }
 
             switch (method.toUpperCase()) {
-                case "GET":
-                    handleGet(exchange);
-                    break;
-                case "POST":
-                    handlePost(exchange);
-                    break;
-                case "DELETE":
-                    handleDelete(exchange);
-                    break;
-                case "PUT":
-                    handlePut(exchange);
-                    break;
-                default:
-                    sendError(exchange, 405, "Unsupported method");
+                case "GET" -> handleGet(exchange);
+                case "POST" -> handlePost(exchange);
+                case "DELETE" -> handleDelete(exchange);
+                case "PUT" -> handlePut(exchange);
+                default -> sendError(exchange, 405, "Unsupported method");
             }
-
         }
 
         private void handleGet(HttpExchange exchange) throws IOException {
             try {
-                // ✅ Extract `role` from query string
                 String query = exchange.getRequestURI().getQuery();
                 String role = "general";
                 if (query != null && query.contains("role=")) {
@@ -132,6 +118,7 @@ public class NoticeHttpServer {
                     obj.put("created_at", notice.getCreatedAt());
                     obj.put("is_event", notice.isEvent());
                     obj.put("event_datetime", notice.getEventTime() != null ? notice.getEventTime().toString() : "");
+                    obj.put("file_url", notice.getFileUrl() != null ? notice.getFileUrl() : "");
                     jsonArray.put(obj);
                 }
 
@@ -163,6 +150,7 @@ public class NoticeHttpServer {
                 String category = json.optString("category", "General");
                 boolean isEvent = json.optBoolean("is_event", false);
                 String eventDateTimeStr = json.optString("event_datetime", "");
+                String fileUrl = json.optString("file_url", null); // ✅ file url
 
                 Timestamp eventTime = null;
                 if (!eventDateTimeStr.isEmpty()) {
@@ -173,18 +161,16 @@ public class NoticeHttpServer {
                 Notice notice = new Notice(title, content, category);
                 notice.setEvent(isEvent);
                 notice.setEventTime(eventTime);
+                notice.setFileUrl(fileUrl); // ✅ set file url
 
                 new NoticeDAO().addNotice(notice);
 
                 try {
-                    System.out.println("📤 Calling FCMSender...");
                     FCMSender.sendPushNotification(title, content);
-                    System.out.println("✅ FCMSender.sendPushNotification() called.");
                 } catch (Exception e) {
                     System.err.println("❌ Push failed: " + e.getMessage());
-                    e.printStackTrace(); // Add this to see the full error stack
+                    e.printStackTrace();
                 }
-
 
                 String response = "{\"message\":\"Notice added and notification sent\"}";
                 exchange.getResponseHeaders().set("Content-Type", "application/json");
@@ -199,18 +185,9 @@ public class NoticeHttpServer {
             }
         }
 
-        private void sendError(HttpExchange exchange, int code, String message) throws IOException {
-            String error = "{\"error\":\"" + message.replace("\"", "\\\"") + "\"}";
-            exchange.getResponseHeaders().set("Content-Type", "application/json");
-            exchange.sendResponseHeaders(code, error.length());
-            try (OutputStream os = exchange.getResponseBody()) {
-                os.write(error.getBytes());
-            }
-        }
-
         private void handleDelete(HttpExchange exchange) throws IOException {
             try {
-                String path = exchange.getRequestURI().getPath(); // /notices/123
+                String path = exchange.getRequestURI().getPath(); // /notices/{id}
                 String[] parts = path.split("/");
                 if (parts.length < 3) {
                     sendError(exchange, 400, "Invalid URL format. Expected /notices/{id}");
@@ -234,12 +211,7 @@ public class NoticeHttpServer {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                String error = "{\"error\":\"Failed to delete notice: " + e.getMessage().replace("\"", "\\\"") + "\"}";
-                exchange.getResponseHeaders().set("Content-Type", "application/json");
-                exchange.sendResponseHeaders(500, error.length());
-                try (OutputStream os = exchange.getResponseBody()) {
-                    os.write(error.getBytes());
-                }
+                sendError(exchange, 500, "Failed to delete notice: " + e.getMessage());
             }
         }
 
@@ -266,6 +238,7 @@ public class NoticeHttpServer {
             String category = json.optString("category", null);
             boolean isEvent = json.optBoolean("is_event", false);
             String eventDateTimeStr = json.optString("event_datetime", "");
+            String fileUrl = json.optString("file_url", null);
 
             Timestamp eventTime = null;
             if (!eventDateTimeStr.isEmpty()) {
@@ -273,9 +246,7 @@ public class NoticeHttpServer {
                 eventTime = Timestamp.valueOf(dt);
             }
 
-            boolean success = new NoticeDAO().updateNotice(id, title, content, category, isEvent, eventTime);
-
-
+            boolean success = new NoticeDAO().updateNotice(id, title, content, category, isEvent, eventTime, fileUrl);
 
             String response = success ? "{\"message\":\"Updated\"}" : "{\"error\":\"Not found\"}";
             int code = success ? 200 : 404;
@@ -287,5 +258,13 @@ public class NoticeHttpServer {
             }
         }
 
+        private void sendError(HttpExchange exchange, int code, String message) throws IOException {
+            String error = "{\"error\":\"" + message.replace("\"", "\\\"") + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(code, error.length());
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(error.getBytes());
+            }
+        }
     }
 }

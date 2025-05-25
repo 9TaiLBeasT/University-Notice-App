@@ -3,10 +3,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
-import java.sql.SQLException;
 
 public class Main {
-    // 🔁 Replace only the main method part with this change:
     public static void main(String[] args) {
         NoticeDAO dao = new NoticeDAO();
         Scanner scanner = new Scanner(System.in);
@@ -49,7 +47,7 @@ public class Main {
                                 LocalDateTime eventDateTime = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                                 eventTimestamp = Timestamp.valueOf(eventDateTime);
                             } catch (Exception e) {
-                                System.out.println("❌ Invalid format. Use: yyyy-MM-ddTHH:mm (e.g. 2025-05-02T14:00)");
+                                System.out.println("❌ Invalid format. Use: yyyy-MM-ddTHH:mm");
                                 break;
                             }
                         }
@@ -89,6 +87,9 @@ public class Main {
                                 System.out.println("Posted On: " + n.getCreatedAt());
                                 if (n.isEvent()) {
                                     System.out.println("📅 Event DateTime: " + n.getEventTime());
+                                }
+                                if (n.getFileUrl() != null && !n.getFileUrl().isEmpty()) {
+                                    System.out.println("📎 File URL: " + n.getFileUrl());
                                 }
                             }
                         }
@@ -138,7 +139,6 @@ public class Main {
                         String updatedContent = null;
                         String updatedCategory = null;
 
-                        // Prompt for event info
                         System.out.print("Is this still an event notice? (yes/no): ");
                         boolean isEvent = scanner.nextLine().equalsIgnoreCase("yes");
 
@@ -150,7 +150,7 @@ public class Main {
                                 LocalDateTime eventDateTime = LocalDateTime.parse(eventDateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                                 eventTime = Timestamp.valueOf(eventDateTime);
                             } catch (Exception e) {
-                                System.out.println("❌ Invalid format. Use: yyyy-MM-ddTHH:mm (e.g. 2025-05-02T14:00)");
+                                System.out.println("❌ Invalid format. Use: yyyy-MM-ddTHH:mm");
                                 break;
                             }
                         }
@@ -181,9 +181,9 @@ public class Main {
                                 break;
                         }
 
-                        dao.updateNotice(updateId, updatedTitle, updatedContent, updatedCategory, isEvent, eventTime);
+                        // ❗ Pass null for fileUrl since terminal input doesn't support it
+                        dao.updateNotice(updateId, updatedTitle, updatedContent, updatedCategory, isEvent, eventTime, null);
                         System.out.println("✅ Notice updated.");
-
                     } catch (Exception e) {
                         System.out.println("❌ Error: " + e.getMessage());
                     }
@@ -200,5 +200,4 @@ public class Main {
 
         scanner.close();
     }
-
 }

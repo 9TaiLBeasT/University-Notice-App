@@ -8,6 +8,7 @@ public class Notice {
     private Timestamp createdAt;
     private boolean isEvent;
     private Timestamp eventTime;
+    private String fileUrl; // ✅ New field
 
     public Notice(String title, String content, String category) {
         this.title = title;
@@ -15,7 +16,6 @@ public class Notice {
         this.category = category;
     }
 
-    // New constructor for event-based notices
     public Notice(String title, String content, String category, boolean isEvent, String eventDateTime) {
         this.title = title;
         this.content = content;
@@ -24,7 +24,6 @@ public class Notice {
 
         try {
             if (eventDateTime != null && !eventDateTime.trim().isEmpty()) {
-                // Convert ISO 8601 (e.g., "2025-05-25T10:00:00") to "2025-05-25 10:00:00"
                 String formatted = eventDateTime.replace("T", " ");
                 this.eventTime = Timestamp.valueOf(formatted);
             }
@@ -49,4 +48,7 @@ public class Notice {
 
     public Timestamp getEventTime() { return eventTime; }
     public void setEventTime(Timestamp eventTime) { this.eventTime = eventTime; }
+
+    public String getFileUrl() { return fileUrl; }
+    public void setFileUrl(String fileUrl) { this.fileUrl = fileUrl; } // ✅ new
 }
