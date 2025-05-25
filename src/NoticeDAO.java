@@ -62,7 +62,7 @@ public class NoticeDAO {
                 String createdAtStr = createdAt != null ? createdAt.toString() : "";
                 String eventTimeStr = eventTime != null ? eventTime.toString() : "";
 
-                Notice notice = new Notice(id, title, content, category, createdAtStr, isEvent, eventTimeStr);
+                Notice notice = new Notice(title, content, category, isEvent, eventTimeStr);
                 notice.setFileUrl(fileUrl); // ✅
                 notices.add(notice);
             }
