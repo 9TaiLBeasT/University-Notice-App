@@ -36,11 +36,11 @@ public class NoticeDAO {
             case "faculty" -> "SELECT * FROM notices WHERE category ILIKE 'faculty' OR category ILIKE 'general' ORDER BY id DESC";
             case "admin" -> "SELECT * FROM notices ORDER BY id DESC";
             default -> "SELECT * FROM notices WHERE category ILIKE 'general' ORDER BY id DESC";
-
-
         };
+
         return getNoticesByQuery(query);
     }
+
 
     private static List<Notice> getNoticesByQuery(String sql) {
         List<Notice> notices = new ArrayList<>();
@@ -50,17 +50,20 @@ public class NoticeDAO {
              ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                Notice notice = new Notice(
-                        rs.getString("title"),
-                        rs.getString("content"),
-                        rs.getString("category")
-                );
-                notice.setId(rs.getInt("id"));
-                notice.setCreatedAt(rs.getTimestamp("created_at"));
-                notice.setEvent(rs.getBoolean("is_event"));
-                notice.setEventTime(rs.getTimestamp("event_time"));
-                notice.setFileUrl(rs.getString("file_url")); // ✅
+                int id = rs.getInt("id");
+                String title = rs.getString("title");
+                String content = rs.getString("content");
+                String category = rs.getString("category");
+                Timestamp createdAt = rs.getTimestamp("created_at");
+                boolean isEvent = rs.getBoolean("is_event");
+                Timestamp eventTime = rs.getTimestamp("event_time");
+                String fileUrl = rs.getString("file_url");
 
+                String createdAtStr = createdAt != null ? createdAt.toString() : "";
+                String eventTimeStr = eventTime != null ? eventTime.toString() : "";
+
+                Notice notice = new Notice(id, title, content, category, createdAtStr, isEvent, eventTimeStr);
+                notice.setFileUrl(fileUrl); // ✅
                 notices.add(notice);
             }
 
@@ -71,6 +74,7 @@ public class NoticeDAO {
 
         return notices;
     }
+
 
     public boolean deleteNotice(int id) {
         String sql = "DELETE FROM notices WHERE id = ?";
