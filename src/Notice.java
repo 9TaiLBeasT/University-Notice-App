@@ -9,8 +9,6 @@ public class Notice {
     private boolean isEvent;
     private Timestamp eventTime;
     private String fileUrl; // ✅ Add this field
-    private String date;
-    private String eventDateTime;
 
     public Notice(String title, String content, String category) {
         this.title = title;
@@ -18,14 +16,11 @@ public class Notice {
         this.category = category;
     }
 
-    public Notice(int id, String title, String content, String category, String date, boolean isEvent, String eventDateTime) {
-        this.id = id;
+    public Notice(String title, String content, String category, boolean isEvent, String eventDateTime) {
         this.title = title;
         this.content = content;
         this.category = category;
-        this.date = date;
         this.isEvent = isEvent;
-        this.eventDateTime = eventDateTime;
 
         try {
             if (eventDateTime != null && !eventDateTime.trim().isEmpty()) {
