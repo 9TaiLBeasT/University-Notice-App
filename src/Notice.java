@@ -16,7 +16,7 @@ public class Notice {
         this.category = category;
     }
 
-    public Notice(String title, String content, String category, boolean isEvent, String eventDateTime) {
+    public Notice(String title, String content, String category, boolean isEvent, Timestamp eventTime, String eventDateTime, String fileUrl) {
         this.title = title;
         this.content = content;
         this.category = category;
